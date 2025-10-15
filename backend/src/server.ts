@@ -1,13 +1,13 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import express, { NextFunction, Request, Response } from 'express';
 import connectDB from './config/db';
 import lotRoutes from './routes/lotRoutes';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Conectar a la base de datos
 connectDB();

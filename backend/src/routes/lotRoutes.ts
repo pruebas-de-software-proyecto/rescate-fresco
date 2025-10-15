@@ -1,8 +1,9 @@
 import express from 'express';
-import { getLotes, createLote } from '../controllers/lotController';
+import { createLote, getLoteById, getLotes } from '../controllers/lotController';
 
 const router = express.Router();
 
 router.get('/', getLotes);
 router.post('/', createLote);
+router.get('/:id', getLoteById);
 export default router;
