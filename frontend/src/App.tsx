@@ -1,12 +1,13 @@
-import LotesPage from './pages/LotesPage';
-import './App.css';
+import './App.css'
+import AppRouter from './routes/AppRouter'
 
 function App() {
+
   return (
-    <div className="App">
-      <LotesPage />
-    </div>
-  );
+    <>
+      <AppRouter />
+    </>
+  )
 }
 
-export default App;
+export default App
