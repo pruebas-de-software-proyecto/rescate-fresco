@@ -1,10 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import LotesPage from "./pages/LotesPage";
+import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <LotesPage />
+    <App />
   </React.StrictMode>
 );
-
