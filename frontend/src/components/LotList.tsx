@@ -1,45 +1,175 @@
-import React, { useEffect, useState } from 'react';
-import { fetchLotes, Lote } from '../api/lotes';
+import React, { useEffect, useState } from 'react'; 
+import { FilterControls } from './FilterControls'; 
+import { fetchLotes, Lote, LoteFilters } from '../api/lotes'; 
+import {
+  Card, CardContent, CardMedia, Typography, Box,
+  CircularProgress, Grid, Button
+} from '@mui/material';
+
+const DEFAULT_CATEGORY = 'Todos'; 
+
+import { useNavigate } from 'react-router-dom';
+import { useDebounce } from '../useDebounce';
 
 export default function LotList() {
-  const [lotes, setLotes] = useState<Lote[]>([]);
+    const [lotes, setLotes] = useState<Lote[]>([]);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchLotes().then(setLotes);
-  }, []);
+    const [categoryFilter, setCategoryFilter] = useState<string>(DEFAULT_CATEGORY);
+    const [expiryDateFilter, setExpiryDateFilter] = useState<string>('');
+    const [searchInput, setSearchInput] = useState<string>(''); 
+    const debouncedSearchFilter = useDebounce(searchInput, 500); 
+    
 
-  if (lotes.length === 0) return <p>No hay lotes disponibles.</p>;
+    // --- LÓGICA DE CARGA Y FILTRADO (useEffect) ---
+    useEffect(() => {
+        const loadLotes = async () => {
+            setLoading(true);
+            const filters: LoteFilters = {};
 
+            // ✅ LÓGICA DE FILTROS CORRECTA
+            if (categoryFilter && categoryFilter !== DEFAULT_CATEGORY) {
+                filters.categoria = categoryFilter;
+            }
+            if (expiryDateFilter) {
+                filters.vencimientoAntesDe = new Date(expiryDateFilter).toISOString(); 
+            }
+            if (debouncedSearchFilter && debouncedSearchFilter.trim()) {
+                filters.nombre = debouncedSearchFilter.trim(); 
+            }
+
+            // 🔍 DEBUG: Ver qué filtros se están enviando
+            console.log("🔍 Filtros enviados:", filters);
+
+            try {
+                const data = await fetchLotes(filters);
+                console.log("✅ Datos recibidos:", data);
+                setLotes(data || []);
+            } catch (error) {
+                console.error("❌ Error al cargar lotes:", error);
+                setLotes([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadLotes();
+        
+    }, [categoryFilter, expiryDateFilter, debouncedSearchFilter]); 
+
+  if (loading)
+    return (
+      <Box sx={{ textAlign: 'center', mt: 5 }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Cargando lotes...</Typography>
+      </Box>
+    );
+
+  const isAnyFilterActive = categoryFilter !== DEFAULT_CATEGORY || expiryDateFilter || searchInput;
+  const noLotesMessage = isAnyFilterActive
+    ? "No se encontraron lotes que coincidan con los filtros. 😢"
+    : "No hay lotes disponibles. 😔";
+
+  if (lotes.length === 0 && !loading)
+    return (
+      <Box sx={{ p: 3 }}>
+        <FilterControls 
+          categoryFilter={categoryFilter} 
+          setCategoryFilter={setCategoryFilter}
+          expiryDateFilter={expiryDateFilter}
+          setExpiryDateFilter={setExpiryDateFilter}
+          searchFilter={searchInput} 
+          setSearchFilter={setSearchInput}
+        />
+        <Typography align="center" sx={{ mt: 5, color: 'text.secondary' }}>
+          {noLotesMessage}
+        </Typography>
+      </Box>
+    );
+
+  // --- Lista de Lotes ---
   return (
-    <table border={1} cellPadding={5} style={{ borderCollapse: 'collapse' }}>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Categoría</th>
-          <th>Descripción</th>
-          <th>Cantidad</th>
-          <th>Precio Original</th>
-          <th>Precio de Rescate</th>
-          <th>Vencimiento</th>
-          <th>Ventana de Retiro</th>
-          <th>Ubicación</th>
-        </tr>
-      </thead>
-      <tbody>
-        {lotes.map(lote => (
-          <tr key={lote._id}>
-            <td>{lote.nombre}</td>
-            <td>{lote.categoria}</td>
-            <td>{lote.descripcion}</td>
-            <td>{lote.cantidad} {lote.unidad}</td>
-            <td>${lote.precioOriginal}</td>
-            <td>${lote.precioRescate}</td>
-            <td>{new Date(lote.fechaVencimiento).toLocaleString()}</td>
-            <td>{lote.ventanaRetiro}</td>
-            <td>{lote.ubicacion}</td>
-          </tr>
+    <Box sx={{ flexGrow: 1, p: 3 }}>
+      <Typography 
+        variant="h3" 
+        component="h1" 
+        gutterBottom 
+        sx={{ mb: 4, fontWeight: 700, color: 'primary.main' }}
+      >
+        ¡Rescata Lotes Ahora! ♻️
+      </Typography>
+      
+      {/* CONTROLES DE FILTRO */}
+      <FilterControls 
+        categoryFilter={categoryFilter} 
+        setCategoryFilter={setCategoryFilter}
+        expiryDateFilter={expiryDateFilter}
+        setExpiryDateFilter={setExpiryDateFilter}
+        searchFilter={searchInput} 
+        setSearchFilter={setSearchInput}
+      />
+      
+      {/* Grid de Lotes */}
+      <Grid container spacing={3} sx={{ mt: 3 }}>
+        {lotes.map((lote) => (
+          <Grid item xs={12} sm={6} md={4} key={lote._id}>
+            <Card sx={{ height: '100%', borderRadius: 2, boxShadow: 4, display: 'flex', flexDirection: 'column' }}>
+              
+              {/* Contenido de la Card (Media y Content) */}
+              {lote.fotos && lote.fotos.length > 0 ? (
+                <CardMedia
+                  component="img"
+                  height="200"
+                  image={lote.fotos[0]}
+                  alt={lote.nombre}
+                  sx={{ objectFit: 'cover' }}
+                />
+              ) : (
+                <Box
+                  sx={{ height: 200, backgroundColor: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#616161', typography: 'subtitle1' }}
+                >
+                  Sin imagen
+                </Box>
+              )}
+
+              <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <Box>
+                  <Typography variant="h6" component="div" noWrap title={lote.nombre}>
+                    {lote.nombre}
+                  </Typography>
+
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    sx={{ mt: 0.5, mb: 1.5, fontWeight: 500 }}
+                  >
+                    Vence: {new Date(lote.fechaVencimiento).toLocaleDateString()}
+                  </Typography>
+                  
+                  <Typography
+                    variant="h5"
+                    color="success.main"
+                    sx={{ fontWeight: 700 }}
+                  >
+                    ${lote.precioRescate}
+                  </Typography>
+                </Box>
+
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  fullWidth 
+                  sx={{ mt: 2 }}
+                  onClick={() => navigate(`/${lote._id}`)}
+                >
+                  Ver Detalles
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </tbody>
-    </table>
+      </Grid>
+    </Box>
   );
 }
