@@ -38,4 +38,16 @@ export const actualizarLote = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ message: 'Error al actualizar lote' });
   }
+
+};
+
+export const deleteLote = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Lot.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: 'Lote no encontrado' });
+    res.json({ message: 'Lote eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al eliminar lote' });
+  }
 };
