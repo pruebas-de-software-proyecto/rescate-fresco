@@ -5,33 +5,34 @@ import {
   DialogTitle, MenuItem, TextField, Typography
 } from '@mui/material';
 import React, { useState } from 'react';
-import FullLotesAPI, { FullLote } from '../services/types'; // Asumo la importación correcta
+import FullLotesAPI, { FullLote } from '../services/types';
 
 interface LoteCreateDialogProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void; // Para refrescar la lista después de crear
+  onSuccess: () => void;
 }
-
-// Estado del formulario: Incluye la URL temporal para entrada del usuario
-type FormDataState = Omit<FullLote, '_id' | 'createdAt' | 'updatedAt' | 'fotos'> & {
-    imageUrl: string; 
+type Nullable<T> = {
+    [P in keyof T]: T[P] | null;
+};
+type FormDataState = Nullable<Omit<FullLote, '_id' | 'createdAt' | 'updatedAt' | 'fotos'>> & {
+    imageUrl: string;
 };
 
 const initialState: FormDataState = {
   nombre: '',
   categoria: 'Frutas',
   descripcion: '',
-  cantidad: 0,
+  cantidad: null,
   unidad: 'kg',
-  precioOriginal: 0,
-  precioRescate: 0,
+  precioOriginal: null,
+  precioRescate: null,
   fechaVencimiento: new Date().toISOString().split('T')[0], // YYYY-MM-DD
   ventanaRetiro: '',
   ubicacion: '',
   proveedor: '',
-  estado: 'Disponible', 
-  imageUrl: '', 
+  estado: 'Disponible',
+  imageUrl: '',
 };
 
 const categorias = ['Frutas', 'Verduras', 'Lácteos', 'Carnes', 'Panadería', 'Otros'];
@@ -42,28 +43,40 @@ const LoteCreateDialog: React.FC<LoteCreateDialogProps> = ({ open, onClose, onSu
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    let finalValue: string | number = value;
+    
+    const numericFields = ['cantidad', 'precioOriginal', 'precioRescate'];
+    
+    let finalValue: string | number;
 
-    // Convertir números correctamente
-    if (type === 'number' || ['cantidad', 'precioOriginal', 'precioRescate'].includes(name)) {
+    if (numericFields.includes(name) || type === 'number') {
         finalValue = parseFloat(value) || 0;
+
+        if (value.trim() === '') {
+            finalValue = 0;
+        }
+
+    } else {
+        finalValue = value;
     }
-    
-    // Asegurar que valores de selects y fechas no se traten como números
-    const finalFinalValue = (e.target.nodeName === 'SELECT' || name === 'fechaVencimiento' || name === 'descripcion') ? value : finalValue; 
-    
-    setFormData((prev) => ({ ...prev, [name]: finalFinalValue as any }));
+  
+    setFormData((prev) => ({ ...prev, [name]: finalValue as any }));
   };
 
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
     setLoading(true);
     setError(null);
 
-    // --- Validación de Campos Requeridos (Cliente) ---
+    // --- 1. VALIDACIÓN DE CAMPOS REQUERIDOS (Cliente) ---
+    // (Esta validación asegura que los campos necesarios no son null)
     const requiredFields: (keyof FormDataState)[] = ['nombre', 'categoria', 'cantidad', 'precioOriginal', 'precioRescate', 'fechaVencimiento', 'ventanaRetiro', 'ubicacion', 'proveedor'];
-    const missingField = requiredFields.find(field => !formData[field] || String(formData[field]).trim() === '' || (typeof formData[field] === 'number' && formData[field] <= 0));
+    
+    const missingField = requiredFields.find(field => {
+        const val = formData[field];
+        // Comprobación: null, cadena vacía o número <= 0
+        return val === null || String(val).trim() === '' || (typeof val === 'number' && val <= 0);
+    });
     
     if (missingField) {
         setError(`El campo '${missingField}' es obligatorio o tiene un valor inválido.`);
@@ -73,39 +86,55 @@ const LoteCreateDialog: React.FC<LoteCreateDialogProps> = ({ open, onClose, onSu
     // ---------------------------------------------------
     
     try {
-      // 1. Preparar el payload JSON
       const { imageUrl, ...loteData } = formData;
       
-      const lotePayload = {
-        ...loteData,
-        // Incluir la URL pública en el array 'fotos'.
+      // --- 2. CONSTRUCCIÓN DEL PAYLOAD FINAL SIN NULLS ---
+      // Usamos el operador '!' (Non-null assertion) para decirle a TypeScript
+      // que sabemos que estos valores no son null gracias a la validación anterior.
+      const lotePayload: Omit<FullLote, "_id" | "createdAt" | "updatedAt"> = {
+        
+        // Campos de texto y selección obligatorios: Usamos '!'
+        nombre: loteData.nombre!, 
+        categoria: loteData.categoria!,
+        descripcion: loteData.descripcion!,
+        unidad: loteData.unidad!,
+        fechaVencimiento: loteData.fechaVencimiento!,
+        ventanaRetiro: loteData.ventanaRetiro!,
+        ubicacion: loteData.ubicacion!,
+        proveedor: loteData.proveedor!,
+        estado: loteData.estado!,
+
+        // Campos numéricos obligatorios: Ya los manejamos como Number o null, 
+        // pero Number() nos asegura el tipo final, y el '!' asegura que no es null.
+        cantidad: Number(loteData.cantidad)!,
+        precioOriginal: Number(loteData.precioOriginal)!,
+        precioRescate: Number(loteData.precioRescate)!,
+        
+        // Fotos
         fotos: imageUrl ? [imageUrl] : [], 
       };
 
-      // 2. Llamar al servicio (asumiendo que FullLotesAPI.create envía JSON cuando no hay File)
+      // 3. Llamar al servicio con el tipo correcto
       await FullLotesAPI.create(lotePayload); 
       
       setFormData(initialState);
       onSuccess(); 
       onClose();
     } catch (error: any) {
-      // Manejo de errores de la API
       const apiError = error.response?.data;
-      const errorMessage = apiError?.message || 'Error desconocido al crear el lote.';
+      let errorMessage = apiError?.message || 'Error desconocido al crear el lote.';
       
       if (apiError?.errors) {
-        // Mostrar el error más relevante de Mongoose
         const firstErrorPath = Object.keys(apiError.errors)[0];
         const detailedMessage = apiError.errors[firstErrorPath].message;
-        setError(`Error de validación de Mongoose: ${firstErrorPath} - ${detailedMessage}`);
-      } else {
-        setError(errorMessage);
+        errorMessage = `Error de validación: ${firstErrorPath} - ${detailedMessage}`;
       }
+      setError(errorMessage);
       console.error('API Error:', error.response?.data || error);
     } finally {
       setLoading(false);
     }
-  };
+};
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -113,7 +142,6 @@ const LoteCreateDialog: React.FC<LoteCreateDialogProps> = ({ open, onClose, onSu
       <DialogContent>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         
-        {/* FILA 1: NOMBRE / DESCRIPCIÓN */}
         <TextField 
             autoFocus margin="dense" name="nombre" 
             label="Nombre del Producto" type="text" fullWidth 
@@ -127,7 +155,6 @@ const LoteCreateDialog: React.FC<LoteCreateDialogProps> = ({ open, onClose, onSu
             required
         />
         
-        {/* FILA 2: CATEGORÍA / CANTIDAD / UNIDAD */}
         <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
           <TextField 
             select label="Categoría" name="categoria" 
@@ -150,7 +177,6 @@ const LoteCreateDialog: React.FC<LoteCreateDialogProps> = ({ open, onClose, onSu
           </TextField>
         </Box>
         
-        {/* FILA 3: PRECIOS */}
         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
             <TextField 
                 name="precioOriginal" label="Precio Original" 
@@ -164,7 +190,6 @@ const LoteCreateDialog: React.FC<LoteCreateDialogProps> = ({ open, onClose, onSu
             />
         </Box>
         
-        {/* FILA 4: VENCIMIENTO / PROVEEDOR */}
         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
             <TextField 
                 margin="dense" name="fechaVencimiento" label="Fecha de Vencimiento" 
@@ -179,26 +204,24 @@ const LoteCreateDialog: React.FC<LoteCreateDialogProps> = ({ open, onClose, onSu
             />
         </Box>
         
-        {/* FILA 5: VENTANA DE RETIRO / UBICACIÓN (Los que fallaron antes) */}
         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-            <TextField 
-                margin="dense" name="ventanaRetiro" 
+            <TextField
+                margin="dense" name="ventanaRetiro"
                 label="Ventana de Retiro (Ej: 16:00-18:00)" type="text" fullWidth 
                 value={formData.ventanaRetiro} onChange={handleInputChange} 
                 required
             />
-            <TextField 
-                margin="dense" name="ubicacion" 
+            <TextField
+                margin="dense" name="ubicacion"
                 label="Ubicación de Retiro" type="text" fullWidth 
                 value={formData.ubicacion} onChange={handleInputChange} 
                 required
             />
         </Box>
         
-        {/* CAMPO URL DE IMAGEN */}
         <Box sx={{ mt: 2, border: '1px dashed grey', p: 2, borderRadius: 1 }}>
           <Typography variant="body2" sx={{ mb: 1 }}>URL de la Imagen (Servidor de Nube)</Typography>
-          <TextField 
+          <TextField
             margin="dense" name="imageUrl" label="Pegar URL aquí" 
             type="url" fullWidth value={formData.imageUrl} onChange={handleInputChange} 
           />
