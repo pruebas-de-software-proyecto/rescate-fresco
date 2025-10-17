@@ -1,6 +1,6 @@
 import React from 'react';
-import LoteTable from '../components/loteTable';
 import DashboardLayout from '../components/DashboardLayout';
+import LoteTable from '../components/loteTable';
 
 const LotesGestionPage: React.FC = () => {
   return (
