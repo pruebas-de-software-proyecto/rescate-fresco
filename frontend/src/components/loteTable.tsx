@@ -1,5 +1,4 @@
-// frontend/src/components/LoteTable.tsx
-import EditIcon from '@mui/icons-material/Edit';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -12,8 +11,8 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-//import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import FullLotesAPI, { FullLote } from '../services/types';
 import LoteCreateDialog from './LoteCreateDialog';
 import LoteFormDialog from './LoteFormDialog';
@@ -93,12 +92,12 @@ const LoteTable: React.FC = () => {
                 <TableCell>{lote.unidad}</TableCell>
                 <TableCell>{lote.precioRescate}</TableCell>
                 <TableCell>
-                  <IconButton onClick={() => handleEdit(lote)}>
+                  <IconButton onClick={() => handleEdit(lote)} aria-label="edit">
                     <EditIcon />
                   </IconButton>
-                  {/* <IconButton onClick={() => handleDelete(lote._id)}>
+                  {<IconButton onClick={() => handleDelete(lote._id)} aria-label="delete">
                     <DeleteIcon />
-                  </IconButton> */}
+                  </IconButton> }
                 </TableCell>
               </TableRow>
             ))}

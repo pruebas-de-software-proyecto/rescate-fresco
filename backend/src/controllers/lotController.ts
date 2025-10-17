@@ -106,11 +106,23 @@ export const getLoteById = async (req: Request, res: Response) => {
 };
 
 export const actualizarLote = async (req: Request, res: Response) => {
-  try {
-    const loteActualizado = await Lot.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!loteActualizado) return res.status(404).json({ message: 'Lote no encontrado' });
-    res.json(loteActualizado);
-  } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar lote' });
-  }
+  try {
+    const loteActualizado = await Lot.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!loteActualizado) return res.status(404).json({ message: 'Lote no encontrado' });
+    res.json(loteActualizado);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar lote' });
+  }
+
+};
+
+export const deleteLote = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Lot.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: 'Lote no encontrado' });
+    res.json({ message: 'Lote eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al eliminar lote' });
+  }
 };
