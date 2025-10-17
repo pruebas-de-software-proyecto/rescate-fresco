@@ -65,8 +65,25 @@ class LotesAPI {
     return response.data;
   }
 
-  async create(lote: Omit<Lote, '_id' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<Lote>> {
-    const response = await api.post('/lotes', lote);
+  async create(
+    lote: Omit<Lote, '_id' | 'createdAt' | 'updatedAt'>,
+    imageFile?: File
+  ): Promise<ApiResponse<Lote>> {
+    const formData = new FormData();
+    Object.entries(lote).forEach(([key, value]) => {
+      formData.append(key, String(value));
+    });
+
+    if (imageFile) {
+      formData.append('imagen', imageFile);
+    }
+
+    const response = await api.post('/lotes', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
     return response.data;
   }
 

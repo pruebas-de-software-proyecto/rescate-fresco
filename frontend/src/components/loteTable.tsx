@@ -1,24 +1,28 @@
 // frontend/src/components/LoteTable.tsx
-import React, { useEffect, useState } from 'react';
+import EditIcon from '@mui/icons-material/Edit';
 import {
+  Box,
+  Button,
+  IconButton,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  IconButton,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
+import React, { useEffect, useState } from 'react';
 //import DeleteIcon from '@mui/icons-material/Delete';
 import FullLotesAPI, { FullLote } from '../services/types';
+import LoteCreateDialog from './LoteCreateDialog';
 import LoteFormDialog from './LoteFormDialog';
 
 const LoteTable: React.FC = () => {
   const [lotes, setLotes] = useState<FullLote[]>([]);
   const [selectedLote, setSelectedLote] = useState<FullLote | null>(null);
-  const [openForm, setOpenForm] = useState(false);
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
 
   const fetchLotes = async () => {
     const data = await FullLotesAPI.getAll();
@@ -29,9 +33,14 @@ const LoteTable: React.FC = () => {
     fetchLotes();
   }, []);
 
+  const handleCreate = () => {
+    setSelectedLote(null);
+    setOpenCreateDialog(true);
+  };
+
   const handleEdit = (lote: FullLote) => {
     setSelectedLote(lote);
-    setOpenForm(true);
+    setOpenEditDialog(true)
   };
 
   const handleDelete = async (id: string) => {
@@ -41,14 +50,28 @@ const LoteTable: React.FC = () => {
     }
   };
 
+  const handleLoteCreated = () => {
+    // 1. Cierra el diálogo/formulario (si no lo haces ya en onClose)
+    handleCloseForm(); 
+    // 2. Lógica para recargar la lista de lotes
+    console.log("Lote creado, recargando datos...");
+    // Por ejemplo: refetchLotes(); 
+};
+
   const handleCloseForm = () => {
+    setOpenCreateDialog(false);
+    setOpenEditDialog(false);
     setSelectedLote(null);
-    setOpenForm(false);
     fetchLotes();
   };
 
   return (
     <>
+      <Box sx={{ mb: 2, textAlign: 'left' }}>
+        <Button variant="contained" onClick={() => setOpenCreateDialog(true)}>
+          Crear Lote
+        </Button>
+      </Box>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -83,13 +106,20 @@ const LoteTable: React.FC = () => {
         </Table>
       </TableContainer>
 
-      {openForm && selectedLote && (
+      <LoteCreateDialog
+          open={openCreateDialog}
+          onClose={handleCloseForm}
+          onSuccess={handleLoteCreated} // <-- ¡Propiedad obligatoria añadida!
+      />
+
+      {openEditDialog && selectedLote && (
         <LoteFormDialog
-          open={openForm}
+          open={openEditDialog}
           onClose={handleCloseForm}
           lote={selectedLote}
         />
       )}
+
     </>
   );
 };
