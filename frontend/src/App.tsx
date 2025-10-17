@@ -1,18 +1,13 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LotesPage from "./pages/LotesPage";
-import LotesGestionPage from "./pages/LotesGestionPage";
-import "./App.css";
+import './App.css'
+import AppRouter from './routes/AppRouter'
 
 function App() {
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LotesPage />} />
-        
-        <Route path="/lotes-gestion" element={<LotesGestionPage />} />
-      </Routes>
-    </Router>
-  );
+    <>
+      <AppRouter />
+    </>
+  )
 }
 
-export default App;
+export default App
