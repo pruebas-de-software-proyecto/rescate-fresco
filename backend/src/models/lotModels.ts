@@ -9,9 +9,9 @@ export interface ILot extends Document {
   precioOriginal: number;
   precioRescate: number;
   fechaVencimiento: Date;
-  ventanaRetiro: string;  // Ej: "08:00 - 12:00"
+  ventanaRetiro: string;
   ubicacion: string;
-  fotos: string[];         // URLs de las fotos
+  fotos: string[];  
   createdAt?: Date;
   updatedAt?: Date;
 }
