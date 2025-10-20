@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Card,
-  CardMedia,
   Chip,
   CircularProgress,
   Container,
@@ -100,12 +99,14 @@ export default function DetailPage() {
     return (
         <Container maxWidth="lg" className={styles.container}>
             <Card className={styles.productCard}>
-                <CardMedia
-                    component="img"
-                    className={styles.productImage}
-                    image={product.fotos[0]}
-                    alt={product.nombre}
-                />
+            <img
+                className={styles.productImage}
+                src={product.fotos && product.fotos.length > 0
+                    ? product.fotos[0]
+                    : '/images/default-lote.png'
+                }
+                alt={product.nombre}
+            />
                 
                 <Box className={styles.productDetailsColumn}>
                     <Chip label={product.categoria} color="primary" className={styles.categoryChip} />
