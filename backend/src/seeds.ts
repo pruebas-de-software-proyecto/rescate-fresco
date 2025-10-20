@@ -15,17 +15,17 @@ const connectDB = async () => {
 };
 
 const loteExample = {
-  nombre: 'Manzanas',
-  categoria: 'Frutas',
-  descripcion: 'Manzanas rojas frescas',
-  cantidad: 10,
+  nombre: 'Paltas',
+  categoria: 'Verduras',
+  descripcion: 'Palta Hass Madura',
+  cantidad: 25,
   unidad: 'kg',
-  precioOriginal: 1000,
-  precioRescate: 500,
+  precioOriginal: 3500,
+  precioRescate: 2700,
   fechaVencimiento: new Date('2025-10-20T12:00:00Z'),
-  ventanaRetiro: '09:00 - 12:00',
-  ubicacion: 'Tienda Central',
-  fotos: ['https://example.com/manzanas.jpg'],
+  ventanaRetiro: '12:00 - 17:00',
+  ubicacion: 'Persa Bio-Bio',
+  fotos: ['https://example.com/paltas.jpg'],
 };
 
 const seedLote = async () => {
