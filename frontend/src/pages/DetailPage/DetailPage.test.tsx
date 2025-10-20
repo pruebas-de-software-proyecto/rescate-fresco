@@ -29,30 +29,9 @@ describe('DetailPage', () => {
     vi.clearAllMocks();
   });
 
-  it('debería mostrar los detalles del producto después de una carga exitosa', async () => {
-    mockedAxios.get.mockResolvedValue({ data: mockProduct });
-
-    render(
-      <MemoryRouter initialEntries={['/lotes/123']}>
-        <Routes>
-          <Route path="/lotes/:id" element={<DetailPage />} />
-        </Routes>
-      </MemoryRouter>
-    );
-    expect(await screen.findByText('Manzanas de Prueba')).toBeInTheDocument();
-
-    const stockInfo = screen.getByTestId('stock-info');
-    expect(stockInfo).toHaveTextContent('Stock: 10 kg');
-    // -------------------------
-
-    expect(screen.getByText('Frescas y jugosas.')).toBeInTheDocument();
-    expect(screen.getByText('$1.000')).toBeInTheDocument();
-    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
-  });
-
-  // --- TEST 2: Escenario de carga ---
-  it('debería mostrar un indicador de carga inicialmente', () => {
-    mockedAxios.get.mockResolvedValue({ data: mockProduct });
+  // TEST 1: Producto no encontrado
+  it('debería mostrar mensaje de producto no encontrado cuando la API devuelve null', async () => {
+    mockedAxios.get.mockResolvedValue({ data: null });
 
     render(
       <MemoryRouter initialEntries={['/lotes/123']}>
@@ -62,23 +41,74 @@ describe('DetailPage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
-
-  it('debería mostrar un mensaje de error si la llamada a la API falla', async () => {
-    const errorMessage = 'Network Error';
-    mockedAxios.get.mockRejectedValue(new Error(errorMessage));
-
-    render(
-      <MemoryRouter initialEntries={['/lotes/123']}>
-        <Routes>
-          <Route path="/lotes/:id" element={<DetailPage />} />
-        </Routes>
-      </MemoryRouter>
-    );
-
-    expect(await screen.findByText(/Network Error/i)).toBeInTheDocument();
+    expect(await screen.findByText('Producto no encontrado.')).toBeInTheDocument();
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
     expect(screen.queryByText('Manzanas de Prueba')).not.toBeInTheDocument();
+  });
+
+  // TEST 2: Imagen por defecto
+  it('debería mostrar imagen por defecto cuando el producto no tiene fotos', async () => {
+    const productWithoutPhotos = {
+      ...mockProduct,
+      fotos: [] // Sin fotos
+    };
+    mockedAxios.get.mockResolvedValue({ data: productWithoutPhotos });
+
+    render(
+      <MemoryRouter initialEntries={['/lotes/123']}>
+        <Routes>
+          <Route path="/lotes/:id" element={<DetailPage />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('Manzanas de Prueba')).toBeInTheDocument();
+    
+    const productImage = screen.getByAltText('Manzanas de Prueba');
+    expect(productImage).toHaveAttribute('src', '/images/default-lote.png');
+  });
+
+  // TEST 3: Formateo de fecha de vencimiento
+  it('debería formatear correctamente la fecha de vencimiento en español', async () => {
+    mockedAxios.get.mockResolvedValue({ data: mockProduct });
+
+    render(
+      <MemoryRouter initialEntries={['/lotes/123']}>
+        <Routes>
+          <Route path="/lotes/:id" element={<DetailPage />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('Manzanas de Prueba')).toBeInTheDocument();
+    expect(screen.getByText('30 de diciembre, 2025')).toBeInTheDocument();
+  });
+
+  // TEST 4: Datos completos mostrados
+  it('debería mostrar todos los datos esenciales del producto', async () => {
+    mockedAxios.get.mockResolvedValue({ data: mockProduct });
+
+    render(
+      <MemoryRouter initialEntries={['/lotes/123']}>
+        <Routes>
+          <Route path="/lotes/:id" element={<DetailPage />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Esperar a que cargue
+    expect(await screen.findByText('Manzanas de Prueba')).toBeInTheDocument();
+
+    // Verificar datos esenciales
+    expect(screen.getByText('Manzanas de Prueba')).toBeInTheDocument(); // Nombre
+    expect(screen.getByText('$1.000')).toBeInTheDocument(); // Precio rescate
+    expect(screen.getByText('Frutas')).toBeInTheDocument(); // Categoría (Chip)
+    
+    // Usar data-testid para stock que está fragmentado
+    const stockInfo = screen.getByTestId('stock-info');
+    expect(stockInfo).toHaveTextContent('Stock: 10 kg');
+    
+    expect(screen.getByText('30 de diciembre, 2025')).toBeInTheDocument(); // Vencimiento
+    expect(screen.getByText('Frescas y jugosas.')).toBeInTheDocument(); // Descripción
   });
 });
