@@ -1,5 +1,3 @@
-// frontend/src/components/LoteCreateDialog.tsx
-
 import {
   Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent,
   DialogTitle, MenuItem, TextField, Typography
@@ -27,7 +25,7 @@ const initialState: FormDataState = {
   unidad: 'kg',
   precioOriginal: null,
   precioRescate: null,
-  fechaVencimiento: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+  fechaVencimiento: new Date().toISOString().split('T')[0],
   ventanaRetiro: '',
   ubicacion: '',
   proveedor: '',
@@ -48,52 +46,66 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
     
     const numericFields = ['cantidad', 'precioOriginal', 'precioRescate'];
     
-    let finalValue: string | number;
+    let finalValue: string | number | null = value;
 
     if (numericFields.includes(name) || type === 'number') {
-        finalValue = parseFloat(value) || 0;
-
         if (value.trim() === '') {
-            finalValue = 0;
+            finalValue = null;
+        } else {
+            const numValue = parseFloat(value);
+            finalValue = isNaN(numValue) ? null : numValue;
         }
-
-    } else {
-        finalValue = value;
     }
   
-    setFormData((prev) => ({ ...prev, [name]: finalValue as any }));
+    setFormData((prev) => ({ ...prev, [name]: finalValue }));
+    setError(null);
   };
 
 const handleSubmit = async () => {
     setLoading(true);
     setError(null);
 
-    // --- 1. VALIDACIÓN DE CAMPOS REQUERIDOS (Cliente) ---
-    // (Esta validación asegura que los campos necesarios no son null)
+    const numericFields = ['cantidad', 'precioOriginal', 'precioRescate'];
+    const negativeField = numericFields.find(field => {
+        const val = formData[field as keyof FormDataState];
+        return typeof val === 'number' && val <= 0;
+    });
+
+    if (negativeField) {
+        setError(`El campo '${negativeField}' debe ser un número mayor a 0.`);
+        setLoading(false);
+        return;
+    }
+
     const requiredFields: (keyof FormDataState)[] = ['nombre', 'categoria', 'cantidad', 'precioOriginal', 'precioRescate', 'fechaVencimiento', 'ventanaRetiro', 'ubicacion', 'proveedor'];
     
     const missingField = requiredFields.find(field => {
         const val = formData[field];
-        // Comprobación: null, cadena vacía o número <= 0
-        return val === null || String(val).trim() === '' || (typeof val === 'number' && val <= 0);
+        return val === null || String(val).trim() === '';
     });
     
     if (missingField) {
-        setError(`El campo '${missingField}' es obligatorio o tiene un valor inválido.`);
+        setError(`El campo '${missingField}' no puede estar vacío.`);
         setLoading(false);
         return;
     }
-    // ---------------------------------------------------
+
+    const fechaVencimientoStr = formData.fechaVencimiento as string;
+    const fechaVencimiento = new Date(fechaVencimientoStr + 'T00:00:00');
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    if (fechaVencimiento < hoy) {
+        setError('La fecha de vencimiento no puede ser anterior a la fecha actual.');
+        setLoading(false);
+        return;
+    }
     
     try {
       const { imageUrl, ...loteData } = formData;
       
-      // --- 2. CONSTRUCCIÓN DEL PAYLOAD FINAL SIN NULLS ---
-      // Usamos el operador '!' (Non-null assertion) para decirle a TypeScript
-      // que sabemos que estos valores no son null gracias a la validación anterior.
       const lotePayload: Omit<FullLote, "_id" | "createdAt" | "updatedAt"> = {
         
-        // Campos de texto y selección obligatorios: Usamos '!'
         nombre: loteData.nombre!, 
         categoria: loteData.categoria!,
         descripcion: loteData.descripcion!,
@@ -104,17 +116,13 @@ const handleSubmit = async () => {
         proveedor: loteData.proveedor!,
         estado: loteData.estado!,
 
-        // Campos numéricos obligatorios: Ya los manejamos como Number o null, 
-        // pero Number() nos asegura el tipo final, y el '!' asegura que no es null.
         cantidad: Number(loteData.cantidad)!,
         precioOriginal: Number(loteData.precioOriginal)!,
         precioRescate: Number(loteData.precioRescate)!,
         
-        // Fotos
         fotos: imageUrl ? [imageUrl] : [], 
       };
 
-      // 3. Llamar al servicio con el tipo correcto
       await FullLotesAPI.create(lotePayload); 
       
       setFormData(initialState);

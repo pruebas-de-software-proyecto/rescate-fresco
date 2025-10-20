@@ -2,15 +2,15 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  Chip,
-  CircularProgress,
-  Container,
-  Divider,
-  Typography
+    Alert,
+    Box,
+    Button,
+    Card,
+    Chip,
+    CircularProgress,
+    Container,
+    Divider,
+    Typography
 } from '@mui/material';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -112,12 +112,12 @@ export default function DetailPage() {
                     <Chip label={product.categoria} color="primary" className={styles.categoryChip} />
                     
                     <Box>
-                      <Typography component="h1" variant="h5" fontWeight="medium">
-                          {product.nombre}
-                      </Typography>
-                      <Typography variant="h4" color="info" fontWeight="bold">
-                          {formatCurrency(product.precioRescate)}
-                      </Typography>
+                        <Typography component="h1" variant="h5" fontWeight="medium">
+                            {product.nombre}
+                        </Typography>
+                        <Typography variant="h4" color="info" fontWeight="bold">
+                            {formatCurrency(product.precioRescate)}
+                        </Typography>
                     </Box>
 
                     <Divider className={styles.divider} />
@@ -130,10 +130,10 @@ export default function DetailPage() {
                             </Typography>
                         </Box>
                         <Box className={styles.infoItem}>
-                          <CalendarMonthIcon color="action" />
-                          <Typography>
+                            <CalendarMonthIcon color="action" />
+                            <Typography>
                                 <strong>Vencimiento:</strong> {formatDate(product.fechaVencimiento)}
-                          </Typography>
+                            </Typography>
                         </Box>
                     </Box>
 
