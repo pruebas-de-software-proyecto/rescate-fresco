@@ -26,43 +26,46 @@ const LoteTest: FullLote = {
 vi.spyOn(FullLotesAPI, 'getAll').mockResolvedValue([LoteTest]);
 const deleteMock = vi.spyOn(FullLotesAPI, 'delete').mockResolvedValue(LoteTest);
 
-describe('Feature Delete - Lote', () => {
+describe('Feature Delete Lote', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock de confirm para que siempre devuelva true
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
   });
 
-  it('permite eliminar un lote y llama al endpoint de delete', async () => {
+  it('muestra diálogo de confirmación al intentar eliminar', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm');
     render(<LoteTable />);
-
-    // Esperar a que cargue el lote
+    
     const deleteButton = await screen.findByRole('button', { name: /delete/i });
-
-    // Hacer click en eliminar
     await act(async () => {
       fireEvent.click(deleteButton);
     });
 
-    // Esperar a que se llame al delete
+    expect(confirmSpy).toHaveBeenCalled();
+  });
+
+  it('elimina el lote cuando se confirma la acción', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    render(<LoteTable />);
+    
+    const deleteButton = await screen.findByRole('button', { name: /delete/i });
+    await act(async () => {
+      fireEvent.click(deleteButton);
+    });
+
     await waitFor(() => {
       expect(deleteMock).toHaveBeenCalledWith('test123');
     });
   });
 
-  it('no llama a delete si el usuario cancela', async () => {
-    // Sobrescribimos confirm para que devuelva false
-    vi.spyOn(window, 'confirm').mockReturnValueOnce(false);
-
+  it('no elimina el lote cuando se cancela la acción', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
     render(<LoteTable />);
+    
     const deleteButton = await screen.findByRole('button', { name: /delete/i });
-
     await act(async () => {
       fireEvent.click(deleteButton);
     });
 
-    await waitFor(() => {
-      expect(deleteMock).not.toHaveBeenCalled();
-    });
+    expect(deleteMock).not.toHaveBeenCalled();
   });
 });
