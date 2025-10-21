@@ -149,7 +149,7 @@ npm run dev
 - [Wiki del Proyecto](https://github.com/pruebas-de-software-proyecto/rescate-fresco/wiki)
 
 ### Videos explicativos
-- [Video Entrega 1](https://www.notion.so/insertar-link-del-video)
+- [Video Entrega 1]([https://www.notion.so/insertar-link-del-video](https://www.canva.com/design/DAG2RnPUEOQ/BS_yET5we7NbT49zyFzEKA/edit?utm_content=DAG2RnPUEOQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton))
 
 ## Licencia 📄
 
