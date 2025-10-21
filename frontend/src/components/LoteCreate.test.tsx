@@ -91,12 +91,14 @@ describe('Feature Create - LoteCreateDialog', () => {
   it('muestra un error si la fecha de vencimiento es anterior a hoy', async () => {
     renderDialog();
 
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const formattedYesterday = yesterday.toISOString().split('T')[0];
-
-    await user.type(screen.getByLabelText(/nombre del producto/i), 'Yogurt Natural');
-    await user.type(screen.getByLabelText(/descripción/i), 'Yogurt fresco');
+    // Llenar todos los campos requeridos primero
+    const nombreInput = screen.getByLabelText(/nombre del producto/i);
+    await user.clear(nombreInput);
+    await user.type(nombreInput, 'Yogurt Natural');
+    
+    const descripcionInput = screen.getByLabelText(/descripción/i);
+    await user.clear(descripcionInput);
+    await user.type(descripcionInput, 'Yogurt fresco');
     
     const categoriaSelect = screen.getByLabelText(/categoría/i);
     await user.click(categoriaSelect);
@@ -109,24 +111,88 @@ describe('Feature Create - LoteCreateDialog', () => {
     await user.clear(screen.getByLabelText(/precio rescate/i));
     await user.type(screen.getByLabelText(/precio rescate/i), '2000');
     
+    // Usar una fecha específica del pasado (ayer)
     const fechaInput = screen.getByLabelText(/fecha de vencimiento/i);
     await user.clear(fechaInput);
-    await user.type(fechaInput, formattedYesterday);
+    await user.type(fechaInput, '2024-10-19'); // Fecha específica del pasado
     
-    await user.type(screen.getByLabelText(/ventana de retiro/i), '10:00 - 13:00');
-    await user.type(screen.getByLabelText(/Ubicación de retiro/i), 'Bodega Central');
-    await user.type(screen.getByLabelText(/proveedor/i), 'Colun');
+    const ventanaInput = screen.getByLabelText(/ventana de retiro/i);
+    await user.clear(ventanaInput);
+    await user.type(ventanaInput, '10:00 - 13:00');
+    
+    const ubicacionInput = screen.getByLabelText(/Ubicación de retiro/i);
+    await user.clear(ubicacionInput);
+    await user.type(ubicacionInput, 'Bodega Central');
+    
+    const proveedorInput = screen.getByLabelText(/proveedor/i);
+    await user.clear(proveedorInput);
+    await user.type(proveedorInput, 'Colun');
 
     const submitButton = screen.getByRole('button', { name: /crear lote/i });
     await user.click(submitButton);
 
-    expect(await screen.findByText(/la fecha de vencimiento no puede ser anterior a la fecha actual/i))
+    // Buscar el mensaje de error
+    expect(await screen.findByText('La fecha de vencimiento no puede ser anterior a la fecha actual.'))
       .toBeInTheDocument();
 
     expect(createMock).not.toHaveBeenCalled();
   });
 
-  // TEST 4: Flujo correcto - Crear lote exitosamente
+  // TEST 4: Precio de rescate mayor o igual al precio original
+  it('muestra un error si el precio de rescate es mayor o igual al precio original', async () => {
+    renderDialog();
+
+    // Llenar todos los campos requeridos
+    const nombreInput = screen.getByLabelText(/nombre del producto/i);
+    await user.clear(nombreInput);
+    await user.type(nombreInput, 'Leche Entera');
+    
+    const descripcionInput = screen.getByLabelText(/descripción/i);
+    await user.clear(descripcionInput);
+    await user.type(descripcionInput, 'Leche fresca de vaca');
+    
+    const categoriaSelect = screen.getByLabelText(/categoría/i);
+    await user.click(categoriaSelect);
+    await user.click(screen.getByRole('option', { name: 'Lácteos' }));
+    
+    await user.clear(screen.getByLabelText(/cantidad/i));
+    await user.type(screen.getByLabelText(/cantidad/i), '5');
+    await user.clear(screen.getByLabelText(/precio original/i));
+    await user.type(screen.getByLabelText(/precio original/i), '3000');
+    await user.clear(screen.getByLabelText(/precio rescate/i));
+    await user.type(screen.getByLabelText(/precio rescate/i), '3000'); // Igual al precio original
+    
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const formattedTomorrow = tomorrow.toISOString().split('T')[0];
+    
+    const fechaInput = screen.getByLabelText(/fecha de vencimiento/i);
+    await user.clear(fechaInput);
+    await user.type(fechaInput, formattedTomorrow);
+    
+    const ventanaInput = screen.getByLabelText(/ventana de retiro/i);
+    await user.clear(ventanaInput);
+    await user.type(ventanaInput, '14:00 - 18:00');
+    
+    const ubicacionInput = screen.getByLabelText(/Ubicación de retiro/i);
+    await user.clear(ubicacionInput);
+    await user.type(ubicacionInput, 'Supermercado Centro');
+    
+    const proveedorInput = screen.getByLabelText(/proveedor/i);
+    await user.clear(proveedorInput);
+    await user.type(proveedorInput, 'Soprole');
+
+    const submitButton = screen.getByRole('button', { name: /crear lote/i });
+    await user.click(submitButton);
+
+    // Buscar el mensaje de error
+    expect(await screen.findByText('El precio de rescate debe ser menor que el precio original.'))
+      .toBeInTheDocument();
+
+    expect(createMock).not.toHaveBeenCalled();
+  });
+
+  // TEST 5: Flujo correcto - Crear lote exitosamente
   it('crea un lote exitosamente cuando todos los campos son válidos', async () => {
     renderDialog();
 
@@ -134,8 +200,13 @@ describe('Feature Create - LoteCreateDialog', () => {
     futureDate.setDate(futureDate.getDate() + 10);
     const formattedFutureDate = futureDate.toISOString().split('T')[0];
 
-    await user.type(screen.getByLabelText(/nombre del producto/i), 'Peras verdes');
-    await user.type(screen.getByLabelText(/descripción/i), 'Peras frescas de temporada');
+    const nombreInput = screen.getByLabelText(/nombre del producto/i);
+    await user.clear(nombreInput);
+    await user.type(nombreInput, 'Peras verdes');
+    
+    const descripcionInput = screen.getByLabelText(/descripción/i);
+    await user.clear(descripcionInput);
+    await user.type(descripcionInput, 'Peras frescas de temporada');
     
     await user.clear(screen.getByLabelText(/cantidad/i));
     await user.type(screen.getByLabelText(/cantidad/i), '10');
@@ -148,9 +219,17 @@ describe('Feature Create - LoteCreateDialog', () => {
     await user.clear(fechaInput);
     await user.type(fechaInput, formattedFutureDate);
     
-    await user.type(screen.getByLabelText(/ventana de retiro/i), '10:00 - 13:00');
-    await user.type(screen.getByLabelText(/Ubicación de retiro/i), 'Mercado Central');
-    await user.type(screen.getByLabelText(/proveedor/i), 'Frutera Don Pepe');
+    const ventanaInput = screen.getByLabelText(/ventana de retiro/i);
+    await user.clear(ventanaInput);
+    await user.type(ventanaInput, '10:00 - 13:00');
+    
+    const ubicacionInput = screen.getByLabelText(/Ubicación de retiro/i);
+    await user.clear(ubicacionInput);
+    await user.type(ubicacionInput, 'Mercado Central');
+    
+    const proveedorInput = screen.getByLabelText(/proveedor/i);
+    await user.clear(proveedorInput);
+    await user.type(proveedorInput, 'Frutera Don Pepe');
 
     const submitButton = screen.getByRole('button', { name: /crear lote/i });
     await user.click(submitButton);

@@ -77,7 +77,7 @@ const handleSubmit = async () => {
         return;
     }
 
-    const requiredFields: (keyof FormDataState)[] = ['nombre', 'categoria', 'cantidad', 'precioOriginal', 'precioRescate', 'fechaVencimiento', 'ventanaRetiro', 'ubicacion', 'proveedor'];
+    const requiredFields: (keyof FormDataState)[] = ['nombre', 'categoria', 'cantidad', 'precioOriginal', 'precioRescate', 'fechaVencimiento', 'ventanaRetiro', 'ubicacion', 'proveedor', 'unidad'];
     
     const missingField = requiredFields.find(field => {
         const val = formData[field];
@@ -97,6 +97,16 @@ const handleSubmit = async () => {
 
     if (fechaVencimiento < hoy) {
         setError('La fecha de vencimiento no puede ser anterior a la fecha actual.');
+        setLoading(false);
+        return;
+    }
+
+    // Validar que el precio de rescate sea menor que el precio original
+    const precioOriginal = Number(formData.precioOriginal);
+    const precioRescate = Number(formData.precioRescate);
+    
+    if (precioRescate >= precioOriginal) {
+        setError('El precio de rescate debe ser menor que el precio original.');
         setLoading(false);
         return;
     }
