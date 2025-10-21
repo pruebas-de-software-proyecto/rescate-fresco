@@ -1,10 +1,16 @@
-import React from 'react';
-import {
-    Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem,
-    TextField, InputAdornment, Button
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import SearchIcon from '@mui/icons-material/Search';
+import {
+    Box,
+    Button,
+    FormControl,
+    InputAdornment,
+    InputLabel,
+    MenuItem,
+    Select,
+    TextField,
+    Typography
+} from '@mui/material';
 
 const mockCategories = ['Todos', 'Frutas', 'Verduras', 'Lácteos', 'Panadería', 'Carnes'];
 const DEFAULT_CATEGORY = 'Todos';
@@ -61,79 +67,81 @@ export function FilterControls({
                 Opciones de Búsqueda y Filtrado
             </Typography>
             
-            <Grid container spacing={3} alignItems="flex-end">
-                
+            <Box
+                sx={{
+                    display: 'grid',
+                    gridTemplateColumns: {
+                        xs: '1fr',
+                        sm: '1fr 1fr',
+                        md: '2fr 1fr 1fr auto'
+                    },
+                    gap: 3,
+                    alignItems: 'end'
+                }}
+            >
                 {/* BARRA DE BÚSQUEDA */}
-                <Grid item xs={12} md={6}>
-                    <TextField
-                        label="Buscar por Nombre del Lote..."
-                        value={searchFilter} 
-                        onChange={(e) => setSearchFilter(e.target.value)} 
-                        fullWidth
-                        variant="outlined"
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon color="action" /> 
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                </Grid>
+                <TextField
+                    label="Buscar por Nombre del Lote..."
+                    value={searchFilter} 
+                    onChange={(e) => setSearchFilter(e.target.value)} 
+                    fullWidth
+                    variant="outlined"
+                    autoFocus={searchFilter.length > 0}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon color="action" /> 
+                            </InputAdornment>
+                        ),
+                    }}
+                />
 
                 {/* Filtro de Categoría */}
-                <Grid item xs={12} sm={4} md={2}>
-                    <FormControl fullWidth variant="outlined">
-                        <InputLabel id="category-filter-label">Categoría</InputLabel>
-                        <Select
-                            labelId="category-filter-label"
-                            id="category-filter"
-                            value={categoryFilter}
-                            label="Categoria"
-                            onChange={(e) => setCategoryFilter(e.target.value as string)}
-                        >
-                            {mockCategories.map((category) => (
-                                <MenuItem key={category} value={category}>
-                                    {category}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid>
+                <FormControl fullWidth variant="outlined">
+                    <InputLabel id="category-filter-label">Categoría</InputLabel>
+                    <Select
+                        labelId="category-filter-label"
+                        id="category-filter"
+                        value={categoryFilter}
+                        label="Categoria"
+                        onChange={(e) => setCategoryFilter(e.target.value as string)}
+                    >
+                        {mockCategories.map((category) => (
+                            <MenuItem key={category} value={category}>
+                                {category}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
                 {/* Filtro de Vencimiento */}
-                <Grid item xs={12} sm={5} md={2}>
-                    <TextField
-                        label="Vence Antes De"
-                        type="date"
-                        value={expiryDateFilter}
-                        onChange={(e) => setExpiryDateFilter(e.target.value)}
-                        InputLabelProps={{ shrink: true }}
-                        fullWidth
-                        variant="outlined"
-                    />
-                </Grid>
+                <TextField
+                    label="Vence Antes De"
+                    type="date"
+                    value={expiryDateFilter}
+                    onChange={(e) => setExpiryDateFilter(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                    variant="outlined"
+                />
                 
                 {/* Botón para resetear filtros */}
                 {isFilterActive && (
-                    <Grid item xs={12} sm={3} md={2}>
-                        <Button 
-                            // 💅 Estilo discreto para el reseteo
-                            variant="text" 
-                            color="primary"
-                            onClick={handleResetFilters}
-                            fullWidth
-                            sx={{ 
-                                height: '56px',
-                                textTransform: 'none',
-                                fontWeight: 600,
-                            }}
-                        >
-                            Resetear
-                        </Button>
-                    </Grid>
+                    <Button 
+                        variant="text" 
+                        color="primary"
+                        onClick={handleResetFilters}
+                        sx={{ 
+                            height: '56px',
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            minWidth: '100px'
+                        }}
+                    >
+                        Resetear
+                    </Button>
                 )}
-            </Grid>
+            </Box>
         </Box>
     );
 }
