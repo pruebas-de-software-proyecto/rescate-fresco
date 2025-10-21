@@ -10,6 +10,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Alert,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -22,6 +23,7 @@ const LoteTable: React.FC = () => {
   const [selectedLote, setSelectedLote] = useState<FullLote | null>(null);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchLotes = async () => {
     const data = await FullLotesAPI.getAll();
@@ -38,8 +40,53 @@ const LoteTable: React.FC = () => {
   };
 
   const handleEdit = (lote: FullLote) => {
+    setError(null);
     setSelectedLote(lote);
     setOpenEditDialog(true)
+  };
+
+  const handleUpdate = async (id: string, updatedData: Partial<FullLote>) => {
+    try {
+      // Validar precio de rescate
+      if (selectedLote && updatedData.precioRescate) {
+        const precioRescate = Number(updatedData.precioRescate);
+        const precioOriginal = selectedLote.precioOriginal;
+
+        if (precioRescate >= precioOriginal) {
+          setError('El precio de rescate debe ser menor al precio original');
+          return;
+        }
+      }
+
+      // Validar campos vacíos
+      const requiredFields = ['nombre', 'descripcion', 'precioRescate'];
+      for (const field of requiredFields) {
+        if (updatedData[field as keyof FullLote] === '') {
+          setError(`El campo ${field} no puede estar vacío`);
+          return;
+        }
+      }
+
+      if (updatedData.fechaVencimiento) {
+      const fechaVencimiento = new Date(updatedData.fechaVencimiento);
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0); // Reset hora a 00:00:00
+
+      if (fechaVencimiento < hoy) {
+        setError('La fecha de vencimiento debe ser posterior a hoy');
+        return;
+      }
+    }
+
+      // Si pasa las validaciones, actualizar
+      await FullLotesAPI.update(id, updatedData);
+      setError(null);
+      handleCloseForm();
+      await fetchLotes();
+    } catch (err) {
+      setError('Error al actualizar el lote');
+      console.error('Error updating lote:', err);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -66,6 +113,11 @@ const LoteTable: React.FC = () => {
 
   return (
     <>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       <Box sx={{ mb: 2, textAlign: 'left' }}>
         <Button variant="contained" onClick={() => setOpenCreateDialog(true)}>
           Crear Lote
@@ -116,6 +168,8 @@ const LoteTable: React.FC = () => {
           open={openEditDialog}
           onClose={handleCloseForm}
           lote={selectedLote}
+          onSubmit={handleUpdate}
+          error={error}
         />
       )}
 
