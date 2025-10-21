@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react'; 
-import { FilterControls } from './FilterControls'; 
-import { fetchLotes, Lote, LoteFilters } from '../api/lotes'; 
 import {
-  Card, CardContent, CardMedia, Typography, Box,
-  CircularProgress, Grid, Button
+  Box,
+  Button,
+  Card, CardContent, CardMedia,
+  CircularProgress,
+  Typography
 } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { fetchLotes, Lote, LoteFilters } from '../api/lotes';
+import { FilterControls } from './FilterControls';
 
 const DEFAULT_CATEGORY = 'Todos'; 
 
@@ -111,9 +114,20 @@ export default function LotList() {
       />
       
       {/* Grid de Lotes */}
-      <Grid container spacing={3} sx={{ mt: 3 }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)'
+          },
+          gap: 3,
+          mt: 3
+        }}
+      >
         {lotes.map((lote) => (
-          <Grid item xs={12} sm={6} md={4} key={lote._id}>
+          <Box key={lote._id}>
             <Card sx={{ height: '100%', borderRadius: 2, boxShadow: 4, display: 'flex', flexDirection: 'column' }}>
               
               {/* Contenido de la Card (Media y Content) */}
@@ -167,9 +181,9 @@ export default function LotList() {
                 </Button>
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 }
