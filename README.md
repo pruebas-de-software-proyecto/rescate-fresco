@@ -4,10 +4,10 @@ Aplicación que permite a las tiendas publicar lotes de alimentos próximos a ve
 
 ## Tabla de Contenidos 📑
 
-1. [Tecnologías](https://www.notion.so/Readme-2929f55016e580fbb103c0c78240344f?pvs=21)
-2. [Instalación](https://www.notion.so/Readme-2929f55016e580fbb103c0c78240344f?pvs=21)
-3. [Equipo](https://www.notion.so/Readme-2929f55016e580fbb103c0c78240344f?pvs=21)
-4. [Enlaces](https://www.notion.so/Readme-2929f55016e580fbb103c0c78240344f?pvs=21)
+1. Tecnologías
+2. Instalación
+3. Equipo
+4. Enlaces
 
 ## Tecnologías 🛠️
 
