@@ -14,7 +14,8 @@ connectDB();
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://127.0.0.1:3000', 
+  'http://127.0.0.1:3000',
+  'https://mango-mushroom-0e9b2f40f.3.azurestaticapps.net'
 ];
 
 // Middlewares
