@@ -4,10 +4,10 @@ Aplicación que permite a las tiendas publicar lotes de alimentos próximos a ve
 
 ## Tabla de Contenidos 📑
 
-1. [Tecnologías](https://www.notion.so/Readme-2929f55016e580fbb103c0c78240344f?pvs=21)
-2. [Instalación](https://www.notion.so/Readme-2929f55016e580fbb103c0c78240344f?pvs=21)
-3. [Equipo](https://www.notion.so/Readme-2929f55016e580fbb103c0c78240344f?pvs=21)
-4. [Enlaces](https://www.notion.so/Readme-2929f55016e580fbb103c0c78240344f?pvs=21)
+1. Tecnologías
+2. Instalación
+3. Equipo
+4. Enlaces
 
 ## Tecnologías 🛠️
 
@@ -149,7 +149,7 @@ npm run dev
 - [Wiki del Proyecto](https://github.com/pruebas-de-software-proyecto/rescate-fresco/wiki)
 
 ### Videos explicativos
-- [Video Entrega 1](https://www.notion.so/insertar-link-del-video)
+- [Video Entrega 1](https://www.canva.com/design/DAG2RnPUEOQ/BS_yET5we7NbT49zyFzEKA/edit?utm_content=DAG2RnPUEOQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 
 ## Licencia 📄
 
