@@ -1,12 +1,12 @@
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import Lot from './models/lotModels'; 
+import mongoose from 'mongoose';
+import Lot from './models/lotModels';
 
 dotenv.config();
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/farmlink');
+    await mongoose.connect('mongodb+srv://fcafigueroal_db_user:xvO26Cq0mQlvyUBd@rescate-fresco-cluster.myy7abz.mongodb.net/farmlink?retryWrites=true&w=majority');
     console.log('Conectado a MongoDB');
   } catch (error) {
     console.error('Error conectando a MongoDB:', error);
