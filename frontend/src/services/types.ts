@@ -1,7 +1,7 @@
 import axios from 'axios';
 const API_BASE_URL = import.meta.env.PROD 
   ? 'https://rescate-fresco-addhaeh7cbehd5ad.eastus2-01.azurewebsites.net/api' 
-  : 'http://localhost:5000/api';
+  : 'http://localhost:5001/api';
 // --------------------
 
 export interface FullLote {
