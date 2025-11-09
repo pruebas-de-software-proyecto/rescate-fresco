@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import cron from "node-cron";
+import Lot from "./models/lotModels";
+
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import connectDB from './config/db';
@@ -82,6 +85,16 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor backend corriendo en puerto ${PORT}`);
   console.log(`📍 API disponible en http://localhost:${PORT}`);
   console.log(`📊 Documentación en http://localhost:${PORT}/api/lotes`);
+});
+
+cron.schedule("0 0 * * *", async () => {
+  console.log("Verificando lotes vencidos...");
+  const hoy = new Date();
+  await Lot.updateMany(
+    { fechaVencimiento: { $lt: hoy }, estado: { $ne: "vencido" } },
+    { $set: { estado: "vencido" } }
+  );
+  console.log("Lotes vencidos actualizados");
 });
 
 export default app;

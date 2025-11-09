@@ -6,16 +6,26 @@ import {
   CardMedia,
   Typography,
   Stack,
+  Chip,
 } from "@mui/material";
 import { Lote } from "../../api/lotes";
 
 interface Props {
   lote: Lote;
   onView: () => void;
-  onReserve: () => void; 
+  onReserve: () => void;
 }
 
 export function LoteCard({ lote, onView, onReserve }: Props) {
+  // 🟢 Colores personalizados por estado
+  const estadoColors: Record<string, "default" | "success" | "warning" | "error" | "info"> = {
+    disponible: "success",
+    reservado: "warning",
+    pagado: "info",
+    retirado: "default",
+    vencido: "error",
+  };
+
   return (
     <Card
       sx={{
@@ -31,8 +41,33 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
+        position: "relative",
       }}
     >
+      {/* 🟡 Estado del lote */}
+      <Chip
+        label={lote.estado.toUpperCase()}
+        color={estadoColors[lote.estado] || "default"}
+        size="small"
+        sx={{
+          position: "absolute",
+          top: 10,
+          right: 10,
+          fontWeight: 600,
+          backgroundColor:
+            lote.estado === "disponible"
+              ? "#4caf50"
+              : lote.estado === "reservado"
+              ? "#ffb300"
+              : lote.estado === "pagado"
+              ? "#0288d1"
+              : lote.estado === "vencido"
+              ? "#e53935"
+              : "#9e9e9e",
+          color: "white",
+        }}
+      />
+
       {/* 🖼️ Imagen y detalles */}
       <Box>
         <CardMedia
@@ -92,7 +127,6 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
         >
           {lote.estado === "reservado" ? "Reservado" : "Reservar"}
         </Button>
-
       </Stack>
     </Card>
   );
