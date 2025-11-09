@@ -1,35 +1,47 @@
-import { Box, Button, Card, CardContent, CardMedia, Typography, Stack } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Stack,
+} from "@mui/material";
 import { Lote } from "../../api/lotes";
 
 interface Props {
   lote: Lote;
   onView: () => void;
-  onAddToCart?: () => void;
+  onReserve: () => void; 
 }
 
-export function LoteCard({ lote, onView, onAddToCart }: Props) {
+export function LoteCard({ lote, onView, onReserve }: Props) {
   return (
     <Card
       sx={{
-        width: 250,
+        width: 260,
         borderRadius: 3,
         boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
         cursor: "pointer",
         transition: "transform 0.2s ease, box-shadow 0.2s ease",
         "&:hover": {
-          transform: "scale(1.02)",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          transform: "scale(1.03)",
+          boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
         },
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
       }}
     >
+      {/* 🖼️ Imagen y detalles */}
       <Box>
         <CardMedia
           component="img"
           height="160"
-          image={lote.fotos?.[0] || "https://via.placeholder.com/300x160?text=Sin+imagen"}
+          image={
+            lote.fotos?.[0] ||
+            "https://via.placeholder.com/300x160?text=Sin+imagen"
+          }
           alt={lote.nombre}
           sx={{ objectFit: "cover", borderRadius: "12px 12px 0 0" }}
         />
@@ -38,7 +50,10 @@ export function LoteCard({ lote, onView, onAddToCart }: Props) {
             {lote.nombre}
           </Typography>
 
-          <Typography color="success.main" sx={{ fontWeight: 700, fontSize: "1.2rem" }}>
+          <Typography
+            color="success.main"
+            sx={{ fontWeight: 700, fontSize: "1.2rem" }}
+          >
             ${lote.precioRescate}
           </Typography>
 
@@ -56,6 +71,7 @@ export function LoteCard({ lote, onView, onAddToCart }: Props) {
         </CardContent>
       </Box>
 
+      {/* ⚙️ Botones */}
       <Stack direction="row" spacing={1.5} sx={{ p: 2, pt: 1 }}>
         <Button
           variant="outlined"
@@ -70,15 +86,13 @@ export function LoteCard({ lote, onView, onAddToCart }: Props) {
 
         <Button
           variant="contained"
-          color="success"
-          fullWidth
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddToCart?.();
-          }}
+          color="primary"
+          disabled={lote.estado !== "disponible"}
+          onClick={() => onReserve()}
         >
-          Agregar al carrito
+          {lote.estado === "reservado" ? "Reservado" : "Reservar"}
         </Button>
+
       </Stack>
     </Card>
   );

@@ -6,21 +6,13 @@ export const getLotes = async (req: Request, res: Response) => {
   try {
     const filters: any = {};
     const { categoria, vencimientoAntesDe, nombre } = req.query;
-    if (nombre) {
-      filters.nombre = { $regex: nombre, $options: 'i' };
-    }
-    if (categoria && categoria !== 'Todos') {
-      filters.categoria = categoria;
-    }
+    if (nombre) filters.nombre = { $regex: nombre, $options: 'i' };
+    if (categoria && categoria !== 'Todos') filters.categoria = categoria;
     if (vencimientoAntesDe) {
-      try {
-        const targetDate = new Date(vencimientoAntesDe as string);
-        filters.fechaVencimiento = { $gte: targetDate };
-      } catch (e) {
-        console.error("Fecha de vencimiento no válida:", vencimientoAntesDe);
-      }
+      const targetDate = new Date(vencimientoAntesDe as string);
+      filters.fechaVencimiento = { $gte: targetDate };
     }
-    console.log("Filtros de MongoDB aplicados:", filters);
+    filters.estado = { $in: ['disponible', 'reservado'] };
     const lotes = await Lot.find(filters);
     res.json(lotes);
   } catch (error) {
@@ -29,11 +21,10 @@ export const getLotes = async (req: Request, res: Response) => {
   }
 };
 
-
 export const createLote = async (req: Request, res: Response) => {
   try {
     const loteData = req.body;
-    const imagenSubida = req.file; 
+    const imagenSubida = req.file;
     if (imagenSubida) {
       const fotoUrl = (imagenSubida as any).location || imagenSubida.path;
       loteData.fotos = [fotoUrl];
@@ -48,11 +39,11 @@ export const createLote = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error al crear el lote:", error);
     if (error instanceof MongooseError.ValidationError) {
-        return res.status(400).json({ 
-            success: false, 
-            message: "Fallo la validación de datos. Verifique que todos los campos requeridos han sido enviados.",
-            errors: (error as any).errors
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Fallo la validación de datos. Verifique que todos los campos requeridos han sido enviados.",
+        errors: (error as any).errors,
+      });
     }
     res.status(500).json({ success: false, error: 'Error interno al crear el lote' });
   }
@@ -60,9 +51,12 @@ export const createLote = async (req: Request, res: Response) => {
 
 export const getLoteById = async (req: Request, res: Response) => {
   try {
-    const lote = await Lot.findById(req.params.id); // Asumo que esta línea falta o fue removida
-    if (!lote) {
-      return res.status(404).json({ message: 'Lote no encontrado' });
+    const lote = await Lot.findById(req.params.id);
+    if (!lote) return res.status(404).json({ message: 'Lote no encontrado' });
+    if (lote.estado === 'reservado' && lote.holdExpiresAt && lote.holdExpiresAt < new Date()) {
+      lote.estado = 'disponible';
+      lote.holdExpiresAt = null;
+      await lote.save();
     }
     res.json(lote);
   } catch (error) {
@@ -78,16 +72,66 @@ export const actualizarLote = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ message: 'Error al actualizar lote' });
   }
-
 };
 
 export const deleteLote = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const deleted = await Lot.findByIdAndDelete(id);
+    const deleted = await Lot.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: 'Lote no encontrado' });
     res.json({ message: 'Lote eliminado correctamente' });
   } catch (error) {
     res.status(500).json({ message: 'Error al eliminar lote' });
+  }
+};
+
+export const reservarLote = async (req: Request, res: Response) => {
+  try {
+    const { loteId } = req.body;
+    const lote = await Lot.findById(loteId);
+    if (!lote) return res.status(404).json({ error: "Lote no encontrado" });
+    if (lote.estado !== "disponible")
+      return res.status(400).json({ error: "El lote no está disponible" });
+
+    const holdDuration = 15 * 60 * 1000; 
+    lote.estado = "reservado";
+    lote.holdExpiresAt = new Date(Date.now() + holdDuration);
+    await lote.save();
+    res.json({
+      message: "Lote reservado temporalmente. Tienes 15 minutos para pagar.",
+      reservaId: lote._id,
+      lote,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error al reservar lote" });
+  }
+};
+
+export const pagarLote = async (req: Request, res: Response) => {
+  try {
+    const { loteId } = req.body;
+    const lote = await Lot.findById(loteId);
+    if (!lote) return res.status(404).json({ error: "Lote no encontrado" });
+    if (lote.estado !== "reservado")
+      return res.status(400).json({ error: "El lote no está reservado" });
+    if (lote.holdExpiresAt && lote.holdExpiresAt < new Date()) {
+      lote.estado = "disponible";
+      lote.holdExpiresAt = null;
+      await lote.save();
+      return res.status(400).json({ error: "La reserva expiró. Debes reservar nuevamente." });
+    }
+    lote.estado = "pagado";
+    lote.holdExpiresAt = null;
+    const [inicio, fin] = lote.ventanaRetiro.split("-");
+    const [h, m] = fin.split(":").map(Number);
+    const retiroLimite = new Date();
+    retiroLimite.setHours(h, m, 0, 0);
+    lote.retiroLimite = retiroLimite;
+    await lote.save();
+    res.json({
+      message: "Pago confirmado. Puedes retirar el lote dentro de la ventana horaria.",
+      lote,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error al procesar el pago" });
   }
 };

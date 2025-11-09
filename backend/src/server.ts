@@ -5,6 +5,7 @@ import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import connectDB from './config/db';
 import lotRoutes from './routes/lotRoutes';
+import reservaRoutes from "./routes/reservaRoutes"
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -56,6 +57,7 @@ app.get('/health', (req: Request, res: Response) => {
 
 // IMPORTANTE: Rutas de la API
 app.use('/api/lotes', lotRoutes);
+app.use("/api/reservas", reservaRoutes); 
 
 // Manejo de rutas no encontradas
 app.use((req: Request, res: Response) => {
