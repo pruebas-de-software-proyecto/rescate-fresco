@@ -6,7 +6,7 @@ dotenv.config();
 
 const connectDB = async () => {
   try {
-    await mongoose.connect('mongodb+srv://fcafigueroal_db_user:xvO26Cq0mQlvyUBd@rescate-fresco-cluster.myy7abz.mongodb.net/farmlink?retryWrites=true&w=majority');
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/farmlink');
     console.log('Conectado a MongoDB');
   } catch (error) {
     console.error('Error conectando a MongoDB:', error);
