@@ -1,3 +1,5 @@
+import axios from 'axios';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 export interface Lote {
   _id: string;
   nombre: string;
@@ -19,23 +21,21 @@ export interface LoteFilters {
   nombre?: string;
 }
 
-import axios from 'axios';
 
 export const fetchLotes = async (filters: LoteFilters): Promise<Lote[]> => {
-  // Convertir filtros a objeto plano (no URLSearchParams)
+  // Asegúrate de que la URL base esté definida
+  if (!API_BASE_URL) {
+      throw new Error("VITE_API_URL no está definido.");
+  }
+  
+  // 2. CONSTRUIR LA URL COMPLETA
+  const API_ENDPOINT = `${API_BASE_URL}/api/lotes`; // O solo /lotes, dependiendo de la configuración de tu backend
+                                                   // Mantendremos /api/lotes como lo tienes.
+  
   const params: Record<string, string> = {};
+  // ... (tu lógica de filtros) ...
 
-  if (filters.categoria) {
-    params.categoria = filters.categoria;
-  }
-  if (filters.vencimientoAntesDe) {
-    params.vencimientoAntesDe = filters.vencimientoAntesDe;
-  }
-  if (filters.nombre) {
-    params.nombre = filters.nombre;
-  }
-
-  const response = await axios.get('/api/lotes', {
+  const response = await axios.get(API_ENDPOINT, {
     params,
     headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
