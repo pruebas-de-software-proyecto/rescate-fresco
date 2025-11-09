@@ -11,9 +11,10 @@ export interface Lote {
   precioRescate: number;
   fechaVencimiento: string;
   ventanaRetiro: string;
+  tienda: string;
   ubicacion: string;
   fotos: string[];
-  estado: 'disponible' | 'reservado'; 
+  estado: 'Disponible' | 'reservado'; 
 }
 
 export interface LoteFilters {

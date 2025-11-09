@@ -17,15 +17,13 @@ interface Props {
 }
 
 export function LoteCard({ lote, onView, onReserve }: Props) {
-  // 🟢 Colores personalizados por estado
   const estadoColors: Record<string, "default" | "success" | "warning" | "error" | "info"> = {
-    disponible: "success",
+    Disponible: "success",
     reservado: "warning",
     pagado: "info",
     retirado: "default",
     vencido: "error",
   };
-
   return (
     <Card
       sx={{
@@ -55,7 +53,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
           right: 10,
           fontWeight: 600,
           backgroundColor:
-            lote.estado === "disponible"
+            lote.estado === "Disponible"
               ? "#4caf50"
               : lote.estado === "reservado"
               ? "#ffb300"
@@ -122,7 +120,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
         <Button
           variant="contained"
           color="primary"
-          disabled={lote.estado !== "disponible"}
+          disabled={lote.estado !== "Disponible"}
           onClick={() => onReserve()}
         >
           {lote.estado === "reservado" ? "Reservado" : "Reservar"}
