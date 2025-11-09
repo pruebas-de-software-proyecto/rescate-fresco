@@ -1,5 +1,7 @@
 import axios from 'axios';
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://rescate-fresco-addhaeh7cbehd5ad.eastus2-01.azurewebsites.net/api' 
+  : 'http://localhost:5001/api'; // Usamos 5001, tu puerto de desarrollo.
 export interface Lote {
   _id: string;
   nombre: string;
@@ -29,7 +31,7 @@ export const fetchLotes = async (filters: LoteFilters): Promise<Lote[]> => {
   }
   
   // 2. CONSTRUIR LA URL COMPLETA
-  const API_ENDPOINT = `${API_BASE_URL}/api/lotes`; // O solo /lotes, dependiendo de la configuración de tu backend
+  const API_ENDPOINT = `${API_BASE_URL}/lotes`; // O solo /lotes, dependiendo de la configuración de tu backend
                                                    // Mantendremos /api/lotes como lo tienes.
   
   const params: Record<string, string> = {};
