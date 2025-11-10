@@ -12,6 +12,22 @@ const api = axios.create({
   },
 });
 
+api.interceptors.request.use(
+  (config) => {
+    // Coge el token de localStorage
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      // Si existe, lo añade a los headers
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export interface Lote {
   _id?: string;
   codigoLote: string;

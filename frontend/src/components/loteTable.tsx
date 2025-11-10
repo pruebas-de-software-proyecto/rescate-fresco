@@ -17,6 +17,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FullLotesAPI, { FullLote } from '../services/types';
 import LoteCreateDialog from './LoteCreateDialog';
 import LoteFormDialog from './LoteFormDialog';
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const LoteTable: React.FC = () => {
   const [lotes, setLotes] = useState<FullLote[]>([]);
@@ -24,6 +26,18 @@ const LoteTable: React.FC = () => {
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const { logout } = useAuth(); 
+
+  const handleUnauthorized = (err: any) => {
+    if (err.response && err.response.status === 401) {
+      setError('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
+      logout();
+      return true; // Devuelve 'true' si fue un error 401
+    }
+    return false; // No fue un error 401
+  };
 
   const fetchLotes = async () => {
     const data = await FullLotesAPI.getAll();
@@ -83,7 +97,7 @@ const LoteTable: React.FC = () => {
       setError(null);
       handleCloseForm();
       await fetchLotes();
-    } catch (err) {
+    } catch (err: any) {
       setError('Error al actualizar el lote');
       console.error('Error updating lote:', err);
     }
@@ -91,8 +105,15 @@ const LoteTable: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('¿Seguro quieres eliminar este lote?')) {
-      await FullLotesAPI.delete(id);
-      fetchLotes();
+      try {
+        await FullLotesAPI.delete(id); // <-- Esta llamada ahora puede fallar (401)
+        fetchLotes();
+      } catch (err: any) { // <-- 3. Añadimos el catch
+        if (!handleUnauthorized(err)) {
+          setError('Error al eliminar el lote');
+        }
+        console.error('Error deleting lote:', err);
+      }
     }
   };
 
@@ -110,11 +131,18 @@ const LoteTable: React.FC = () => {
     setSelectedLote(null);
     fetchLotes();
   };
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <>
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}

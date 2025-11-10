@@ -9,8 +9,12 @@ import {
 import styles from './LoginPage.module.css'; // Importamos el nuevo CSS
 import fondoLogin from '../../assets/images/bolsa con lechuga.png'; 
 import Logo from '../../components/Logo';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 
 export default function LoginPage() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -22,6 +26,32 @@ export default function LoginPage() {
       ...prevData,
       [name]: value,
     }));
+
+    const dataParaBackend = {
+    email: formData.email,
+    password: formData.password,
+    };
+    try {
+    // 1. Llama a tu API (¡asegúrate que el puerto 5001 sea correcto!)
+    const response = await axios.post(
+      'http://localhost:5001/api/auth/login', 
+      dataParaBackend
+    );
+    
+    // 2. El backend devuelve { token, user }
+    const { token, user } = response.data;
+    
+    // 3. ¡AQUÍ LO GUARDAS!
+    // Esto lo pone en el estado de React Y en localStorage
+    login(token, user);
+    
+    // 4. Lo envías a la página principal
+    navigate('/');
+
+  } catch (error) {
+    console.error('Error de login:', error);
+    // (Aquí muestras un error al usuario)
+  }
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
