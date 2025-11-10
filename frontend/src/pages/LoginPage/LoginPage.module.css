@@ -1,0 +1,85 @@
+.container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.backgroundSection {
+  flex: 1;
+  background-size: cover;
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-color: #F4FAF4; 
+  transition: background-image 0.3s ease-in-out;
+}
+
+.formSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  max-width: 39%;
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 350px;
+}
+
+.title {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 2rem;
+  text-align: center;
+}
+
+.registerLink {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.inputGroup {
+  width: 100%;
+  height: auto;
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.inputLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.inputField {
+  margin-bottom: 1.25rem !important;
+  width: 100%;
+}
+
+.submitButton {
+    margin-top: 1.5rem !important;
+    padding: 0.75rem;
+    background-color: #2A7C48 !important;
+    color: white;
+    width: 100%;
+    font-size: 1rem;
+    text-transform: none;
+}
+
+.submitButton:hover {
+  background-color: #256b3f !important;
+}
+
+.logoContainer {
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+
+.logo {
+  width: 220px;
+}
