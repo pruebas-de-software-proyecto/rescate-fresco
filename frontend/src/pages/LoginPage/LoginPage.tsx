@@ -32,26 +32,26 @@ export default function LoginPage() {
     password: formData.password,
     };
     try {
-    // 1. Llama a tu API (¡asegúrate que el puerto 5001 sea correcto!)
-    const response = await axios.post(
-      'http://localhost:5001/api/auth/login', 
-      dataParaBackend
-    );
-    
-    // 2. El backend devuelve { token, user }
-    const { token, user } = response.data;
-    
-    // 3. ¡AQUÍ LO GUARDAS!
-    // Esto lo pone en el estado de React Y en localStorage
-    login(token, user);
-    
-    // 4. Lo envías a la página principal
-    navigate('/');
+      // 1. Llama a tu API (¡asegúrate que el puerto 5001 sea correcto!)
+      const response = await axios.post(
+        'http://localhost:5001/api/auth/login', 
+        dataParaBackend
+      );
+      
+      // 2. El backend devuelve { token, user }
+      const { token, user } = response.data;
+      
+      // 3. ¡AQUÍ LO GUARDAS!
+      // Esto lo pone en el estado de React Y en localStorage
+      login(token, user);
+      
+      // 4. Lo envías a la página principal
+      navigate('/');
 
-  } catch (error) {
-    console.error('Error de login:', error);
-    // (Aquí muestras un error al usuario)
-  }
+    } catch (error) {
+      console.error('Error de login:', error);
+      // (Aquí muestras un error al usuario)
+    }
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

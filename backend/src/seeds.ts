@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import Lot from './models/lotModels';
+import Lot from './controllers/models/lotModels';
 
 dotenv.config();
 
