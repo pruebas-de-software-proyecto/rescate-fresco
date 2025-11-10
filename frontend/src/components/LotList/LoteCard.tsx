@@ -9,21 +9,31 @@ import {
   Chip,
 } from "@mui/material";
 import { Lote } from "../../api/lotes";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   lote: Lote;
   onView: () => void;
-  onReserve: () => void;
 }
 
-export function LoteCard({ lote, onView, onReserve }: Props) {
-  const estadoColors: Record<string, "default" | "success" | "warning" | "error" | "info"> = {
+export function LoteCard({ lote, onView }: Props) {
+  const navigate = useNavigate();
+
+  const estadoColors: Record<
+    string,
+    "default" | "success" | "warning" | "error" | "info"
+  > = {
     Disponible: "success",
     reservado: "warning",
     pagado: "info",
     retirado: "default",
     vencido: "error",
   };
+
+  const handleReserve = () => {
+    navigate(`/pago/${lote._id}`);
+  };
+
   return (
     <Card
       sx={{
@@ -121,7 +131,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
           variant="contained"
           color="primary"
           disabled={lote.estado !== "Disponible"}
-          onClick={() => onReserve()}
+          onClick={handleReserve}
         >
           {lote.estado === "reservado" ? "Reservado" : "Reservar"}
         </Button>
