@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Error as MongooseError } from 'mongoose';
-import Lot from './models/lotModels';
+import Lot from '../models/lotModels';
 
 export const getLotes = async (req: Request, res: Response) => {
   try {

@@ -18,7 +18,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:5173', // <-- 2. AÑADE ESTO (Vite usa el puerto 5173 por defecto)
-  'http://127.0.0.1:5173'
+  'http://127.0.0.1:5173',
   'https://mango-mushroom-0e9b2f40f.3.azurestaticapps.net'
 ];
 

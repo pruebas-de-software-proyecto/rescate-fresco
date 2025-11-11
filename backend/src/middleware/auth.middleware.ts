@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { IUser } from '../controllers/models/user.model'; // Importamos nuestra interfaz de usuario
+import { IUser } from '../models/user.model'; // Importamos nuestra interfaz de usuario
 
 // Definimos un tipo para el payload que está dentro del token
 interface JwtPayload {

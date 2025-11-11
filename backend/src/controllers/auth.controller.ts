@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { User } from './models/user.model';
+import { User } from '../models/user.model';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -54,7 +54,7 @@ export const login = async (req: Request, res: Response) => {
 
     // 2. Buscar usuario (y pedir explícitamente el password)
     const user = await User.findOne({ email }).select('+password');
-    if (!user) {
+    if (!user || !user.password) { // <-- CAMBIO AQUÍ
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
