@@ -8,14 +8,16 @@ import {
     Divider,
     Typography
 } from '@mui/material';
+// import axios from 'axios';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import api from '../../api/lotes';
+import { useAuth } from '../../context/AuthContext';
+
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
-import NavBar from '../../components/NavBar';
-import FullLotesAPI, { FullLote } from '../../services/types';
 import styles from './DetailPage.module.css';
 
 
@@ -26,14 +28,17 @@ export default function DetailPage() {
     const [error, setError] = useState<string | null>(null);
     const [imgIndex, setImgIndex] = useState(0);
 
+    const { logout } = useAuth();
+
     useEffect(() => {
         if (!id) return;
 
         const fetchProduct = async () => {
             try {
                 setLoading(true);
-                const lote: FullLote = await FullLotesAPI.getById(id);
-                setProduct(lote);
+                setError(null);
+                const response = await api.get(`/lotes/${id}`);
+                setProduct(response.data);
             } catch (err: any) {
                 setError(err?.message || 'No se pudo cargar la información del producto.');
             } finally {
@@ -42,7 +47,7 @@ export default function DetailPage() {
         };
 
         fetchProduct();
-    }, [id]);
+    }, [id, logout]);
 
     const handleAddToCart = () => {
         console.log(`Producto ${product?.nombre} añadido al carrito.`);

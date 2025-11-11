@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://rescate-fresco-addhaeh7cbehd5ad.eastus2-01.azurewebsites.net/api' 
+  : 'http://localhost:5001/api';
+// --------------------
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -8,6 +11,22 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+api.interceptors.request.use(
+  (config) => {
+    // Coge el token de localStorage
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      // Si existe, lo añade a los headers
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export interface Lote {
   _id?: string;
