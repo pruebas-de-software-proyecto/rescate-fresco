@@ -14,10 +14,11 @@ import { es } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import api from '../../api/lotes';
+import { getLoteById } from '../../api/lotes';
 import { useAuth } from '../../context/AuthContext';
 
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
+import { FullLote } from '../../services/types';
 import styles from './DetailPage.module.css';
 
 
@@ -37,8 +38,8 @@ export default function DetailPage() {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await api.get(`/lotes/${id}`);
-                setProduct(response.data);
+                const response = await getLoteById(id!);
+                setProduct(response);
             } catch (err: any) {
                 setError(err?.message || 'No se pudo cargar la información del producto.');
             } finally {
@@ -104,7 +105,6 @@ export default function DetailPage() {
 
     return (
         <div className={styles.page}>
-            <NavBar />
             <Container maxWidth="lg" className={styles.container}>
                 <Box className={styles.productCard} sx={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                     <Box sx={{ width: 400, display: 'flex', flexDirection: 'column', alignItems: 'center' }} className={styles.carouselLeft}>
