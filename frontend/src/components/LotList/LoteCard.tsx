@@ -4,19 +4,20 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Typography,
-  Stack,
   Chip,
+  Stack,
+  Typography,
 } from "@mui/material";
-import { Lote } from "../../api/lotes";
 import { useNavigate } from "react-router-dom";
+import { Lote } from "../../api/lotes";
 
 interface Props {
   lote: Lote;
   onView: () => void;
+  onReserve?: () => void;
 }
 
-export function LoteCard({ lote, onView }: Props) {
+export function LoteCard({ lote, onView, onReserve }: Props) {
   const navigate = useNavigate();
 
   const estadoColors: Record<

@@ -1,8 +1,8 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import LotList from "./LotList";
+import { vi } from "vitest";
 import { fetchLotes, Lote } from "../../api/lotes";
+import LotList from "./LotList";
 
 // Mock del módulo de navegación
 const mockNavigate = vi.fn();
@@ -33,6 +33,8 @@ const mockLotes: Lote[] = [
     ubicacion: "Supermercado A",
     fotos: ["http://example.com/leche.jpg"],
     categoria: "Lácteos",
+    tienda: "Tienda 1",
+    estado: "Disponible",
   },
   {
     _id: "2",
@@ -47,6 +49,8 @@ const mockLotes: Lote[] = [
     ubicacion: "Panadería B",
     fotos: [],
     categoria: "Panadería",
+    tienda: "Tienda 1",
+    estado: "Disponible",
   },
 ];
 
