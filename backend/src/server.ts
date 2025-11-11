@@ -10,6 +10,8 @@ import connectDB from './config/db';
 import lotRoutes from './routes/lotRoutes';
 import reservaRoutes from "./routes/reservaRoutes";
 import paymentRoutes from './routes/paymentRoutes';
+import authRoutes from './routes/auth.routes';
+import { protect } from './middleware/auth.middleware';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -19,7 +21,10 @@ connectDB();
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://127.0.0.1:3000', 
+  'http://127.0.0.1:3000',
+  'http://localhost:5173', // <-- 2. AÑADE ESTO (Vite usa el puerto 5173 por defecto)
+  'http://127.0.0.1:5173',
+  'https://mango-mushroom-0e9b2f40f.3.azurestaticapps.net'
 ];
 
 // Middlewares
@@ -93,6 +98,8 @@ app.get('/health', (req: Request, res: Response) => {
     uptime: process.uptime()
   });
 });
+
+app.use('/api/auth', authRoutes);
 
 // IMPORTANTE: Rutas de la API
 app.use('/api/lotes', lotRoutes);

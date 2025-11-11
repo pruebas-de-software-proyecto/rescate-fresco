@@ -1,9 +1,26 @@
-html, body, #root {
-  height: 100%;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+/* 2. Reseteo global y aplicación de la fuente */
+html, body {
   margin: 0;
   padding: 0;
-  background-color: #e8f5e9;
+  box-sizing: border-box; /* Buena práctica para el layout */
+  
+  /* 3. Aplicar Inter a toda la app */
+  font-family: 'Inter', sans-serif;
+  
+  /* Asegura que el contenedor raíz también ocupe todo */
+  height: 100%;
+  width: 100%;
 }
+
+#root {
+  margin: 0 auto;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+}
+
 
 /* prueba */
 
@@ -17,7 +34,7 @@ html, body, #root {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em #388E3C);
 }
 
 @keyframes logo-spin {
