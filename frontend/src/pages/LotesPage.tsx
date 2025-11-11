@@ -7,7 +7,6 @@ import HeroBanner from "../components/LotList/HeroBanner";
 export default function LotesPage() {
   return (
     <>
-      <NavBar />
       <HeroBanner />
       <div style={{ padding: "2rem" }}>
         <LotList />

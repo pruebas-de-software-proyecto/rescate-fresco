@@ -7,10 +7,12 @@ import {
   Link,
   ToggleButton,
   ToggleButtonGroup,
+  Alert,
   FormControl,     // <-- AÑADE ESTE
   InputLabel,      // <-- AÑADE ESTE
   OutlinedInput,   // <-- AÑADE ESTE
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 import styles from './RegisterPage.module.css';
@@ -18,7 +20,7 @@ import logoRescateFrecoVerde from '../../assets/images/logo.svg';
 import fondoConsumidor from '../../assets/images/fondo_consumidor.png';
 import fondoTienda from '../../assets/images/fondo_tienda.png';
 import Logo from '../../components/Logo';
-
+import api from '../../api/lotes';
 export default function RegisterPage() {
   const [role, setRole] = useState<'consumidor' | 'tienda'>('consumidor');// Queda seteado por defecto el rol de consumidor
   const [formData, setFormData] = useState({
@@ -27,6 +29,9 @@ export default function RegisterPage() {
     nombreConsumidor: '',
     nombreTienda: '',
   });
+
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleRoleChange = (event: React.MouseEvent<HTMLElement>, newRole: 'consumidor' | 'tienda',) => {
       if (newRole !== null) {
@@ -42,11 +47,13 @@ export default function RegisterPage() {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError(null); // Limpiar errores anteriores
     
     let dataParaBackend;
     
+    // Tu lógica de roles (¡está perfecta!)
     if (role === 'consumidor') {
       dataParaBackend = {
         role: 'CONSUMIDOR',
@@ -64,6 +71,20 @@ export default function RegisterPage() {
     }
 
     console.log('Enviando al backend:', dataParaBackend);
+
+    try {
+      // Llamamos a la API de registro
+      await api.post('/auth/register', dataParaBackend);
+      
+      // Si el registro es exitoso:
+      alert('¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.');
+      navigate('/login'); // Redirigir a la página de login
+
+    } catch (err: any) {
+      console.error('Error en el registro:', err);
+      // Mostrar error (ej: "El email ya está en uso")
+      setError(err.response?.data?.message || 'Ocurrió un error al registrarse');
+    }
   };
   return (
     <div className={styles.container}>
@@ -109,6 +130,11 @@ export default function RegisterPage() {
           </ToggleButtonGroup>
 
           <form onSubmit={handleSubmit}>
+            {error && (
+              <Alert severity="error" sx={{ my: 2 }}>
+                {error}
+              </Alert>
+            )}
             
             {role === 'consumidor' ? (
               <div className={styles.inputGroup}>

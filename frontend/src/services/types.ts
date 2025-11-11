@@ -1,9 +1,12 @@
-import axios from 'axios';
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://rescate-fresco-addhaeh7cbehd5ad.eastus2-01.azurewebsites.net/api' 
-  : 'http://localhost:5001/api';
+// 1. IMPORTAMOS la instancia 'api' CORRECTA (la que tiene el token)
+import api from '../api/lotes';
+
+// 2. ELIMINAMOS las constantes duplicadas. 'api' ya tiene la URL base.
+// (No hay 'axios' ni 'API_BASE_URL' aquí)
+
 // --------------------
 
+// 3. ¡LA INTERFAZ COMPLETA! (Aquí estaba el error)
 export interface FullLote {
   _id: string;
   nombre: string;
@@ -25,67 +28,57 @@ export interface FullLote {
   updatedAt?: string;
 }
 
-const api = axios.create({ baseURL: API_BASE_URL });
-
+// 4. LA CLASE (que ya estaba bien y usa la 'api' importada)
 class FullLotesAPI {
   async getAll(): Promise<FullLote[]> {
-    const res = await api.get('/lotes'); // usa el endpoint existente
-    return res.data; // devuelve todos los campos
+    // Esta ruta '/lotes' probablemente debería ser '/lotes/gestion'
+    // Revisa tus rutas del backend, pero por ahora usa el token.
+    const res = await api.get('/lotes'); 
+    return res.data;
   }
 
-// frontend/src/services/fullLotesService.ts (Función Corregida)
-
   async create(
-      // El payload debe incluir el campo 'fotos' con las URLs
-      lotePayload: Omit<FullLote, '_id' | 'createdAt' | 'updatedAt'>, 
-      imageFile?: File
-    ): Promise<{ data: FullLote }> {
-      
-      // Si NO hay archivo adjunto, enviamos el payload como JSON
-      if (!imageFile) {
-        console.log('Enviando datos como JSON al backend...');
-        const res = await api.post('/lotes', lotePayload); // Envía JSON (application/json)
-        return res.data;
-      }
-      
-      // Si SÍ hay archivo, usamos FormData (el flujo original de Multer)
-      console.log('Enviando datos como FormData (con archivo)...');
-      const formData = new FormData();
-      
-      // Adjuntar campos de texto/datos, incluido el array 'fotos'
-      Object.entries(lotePayload).forEach(([key, value]) => {
-        // Manejar el array 'fotos' por separado si es necesario, 
-        // o dejar que el backend lo parsee correctamente (opción más simple)
-        if (key === 'fotos') {
-            // Asumimos que 'value' es un array de strings (URLs)
-            (value as string[]).forEach((url, index) => {
-                formData.append(`${key}[${index}]`, url);
-            });
-        } else {
-            formData.append(key, String(value));
-        }
-      });
-
-      // Adjuntar el archivo
-      formData.append('imagen', imageFile);
-
-      // No se establece 'Content-Type', Axios lo hace automáticamente con el boundary
-      const res = await api.post('/lotes', formData); 
+    lotePayload: Omit<FullLote, '_id' | 'createdAt' | 'updatedAt'>, 
+    imageFile?: File
+  ): Promise<{ data: FullLote }> {
+    
+    if (!imageFile) {
+      console.log('Enviando datos como JSON al backend...');
+      const res = await api.post('/lotes', lotePayload);
       return res.data;
     }
+    
+    console.log('Enviando datos como FormData (con archivo)...');
+    const formData = new FormData();
+    
+    Object.entries(lotePayload).forEach(([key, value]) => {
+      if (key === 'fotos') {
+        (value as string[]).forEach((url, index) => {
+            formData.append(`${key}[${index}]`, url);
+        });
+      } else {
+          formData.append(key, String(value));
+      }
+    });
+
+    formData.append('imagen', imageFile);
+
+    const res = await api.post('/lotes', formData); 
+    return res.data;
+  }
 
   async getById(id: string): Promise<FullLote> {
-    const res = await api.get(`/lotes/${id}`);
+    const res = await api.get(`/lotes/${id}`); // <-- Enviará token
     return res.data;
   }
 
   async update(id: string, lote: Partial<FullLote>): Promise<FullLote> {
-    const res = await api.put(`/lotes/${id}`, lote);
+    const res = await api.put(`/lotes/${id}`, lote); // <-- Enviará token
     return res.data;
   }
 
   async delete(id: string): Promise<FullLote> {
-    const res = await api.delete(`/lotes/${id}`);
+    const res = await api.delete(`/lotes/${id}`); // <-- Enviará token
     return res.data;
   }
 }

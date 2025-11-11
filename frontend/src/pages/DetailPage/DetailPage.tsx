@@ -18,8 +18,8 @@ import { es } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import api from '../services/api'; // <-- 2. Importamos nuestra instancia 'api'
-import { useAuth } from '../context/AuthContext';
+import api from '../../api/lotes';
+import { useAuth } from '../../context/AuthContext';
 
 import styles from './DetailPage.module.css';
 

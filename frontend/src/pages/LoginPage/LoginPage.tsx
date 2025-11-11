@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   TextField,
   Button,
   Typography,
   Link,
+  Alert,
 } from '@mui/material';
 import styles from './LoginPage.module.css'; // Importamos el nuevo CSS
 import fondoLogin from '../../assets/images/bolsa con lechuga.png'; 
 import Logo from '../../components/Logo';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+//import axios from 'axios';
+import api from '../../api/lotes';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -20,50 +23,46 @@ export default function LoginPage() {
     password: '',
   });
 
+  const [error, setError] = useState<string | null>(null);
+  
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData(prevData => ({
       ...prevData,
       [name]: value,
     }));
-
-    const dataParaBackend = {
-    email: formData.email,
-    password: formData.password,
-    };
-    try {
-      // 1. Llama a tu API (¡asegúrate que el puerto 5001 sea correcto!)
-      const response = await axios.post(
-        'http://localhost:5001/api/auth/login', 
-        dataParaBackend
-      );
-      
-      // 2. El backend devuelve { token, user }
-      const { token, user } = response.data;
-      
-      // 3. ¡AQUÍ LO GUARDAS!
-      // Esto lo pone en el estado de React Y en localStorage
-      login(token, user);
-      
-      // 4. Lo envías a la página principal
-      navigate('/');
-
-    } catch (error) {
-      console.error('Error de login:', error);
-      // (Aquí muestras un error al usuario)
-    }
+    
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
-    // Aquí iría la lógica para enviar al backend
+    setError(null); // Limpia errores anteriores
+
     const dataParaBackend = {
       email: formData.email,
       password: formData.password,
     };
 
     console.log('Enviando al backend:', dataParaBackend);
+
+    try {
+      // ¡TODA LA LÓGICA DE LOGIN VA AQUÍ!
+      const response = await api.post(
+        '/auth/login', // La URL base ya está en 'api'
+        dataParaBackend
+      );
+      
+      const { token, user } = response.data;
+      
+      login(token, user); // Guardamos en el contexto
+      
+      navigate('/'); // Enviamos a la página principal
+
+    } catch (err: any) {
+      console.error('Error de login:', err);
+      // Mostramos un error genérico al usuario
+      setError('Email o contraseña incorrectos. Por favor, intenta de nuevo.');
+    }
   };
 
   return (
@@ -96,6 +95,11 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
             
             {/* Usamos el mismo patrón de 'label' + 'TextField' del registro */}
             <div className={styles.inputGroup}>

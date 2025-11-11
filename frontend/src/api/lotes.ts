@@ -5,13 +5,13 @@ const API_BASE_URL = import.meta.env.PROD
   ? 'https://rescate-fresco-addhaeh7cbehd5ad.eastus2-01.azurewebsites.net/api' 
   : 'http://localhost:5001/api';
 
-// --- 2. CREAMOS LA INSTANCIA 'API' CON TOKEN ---
-// Esta instancia 'api' reemplazará a 'axios'
+// 2. CREAMOS LA INSTANCIA 'API' CENTRAL
+// Esta instancia 'api' reemplazará a 'axios' en todo el proyecto
 const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// 3. EL INTERCEPTOR (LA MAGIA)
+// 3. AÑADIMOS EL INTERCEPTOR DE TOKEN (LA MAGIA)
 // Esto se ejecuta ANTES de CUALQUIER llamada hecha con 'api'
 api.interceptors.request.use(
   (config) => {
@@ -22,10 +22,9 @@ api.interceptors.request.use(
       // Si existe, lo añade a los headers
       config.headers.Authorization = `Bearer ${token}`;
     }
-    return config; // Devuelve la config (con el token) para que la llamada continúe
+    return config; // Devuelve la config (con el token)
   },
   (error) => {
-    // Si hay un error al adjuntar el token, rechaza la promesa
     return Promise.reject(error);
   }
 );
@@ -36,7 +35,14 @@ export interface Lote {
   _id: string;
   nombre: string;
   categoria: string;
-  // ... (el resto de tus campos)
+  descripcion: string;
+  cantidad: number;
+  unidad: 'kg' | 'unidades' | 'litros';
+  precioOriginal: number;
+  precioRescate: number;
+  fechaVencimiento: string;
+  ventanaRetiro: string;
+  ubicacion: string;
   fotos: string[];
 }
 
@@ -50,7 +56,7 @@ export interface LoteFilters {
 // --- 'fetchLotes' MODIFICADO ---
 export const fetchLotes = async (filters: LoteFilters): Promise<Lote[]> => {
   
-  // 4. Preparamos los parámetros (tu lógica original)
+  // Preparamos los parámetros (tu lógica original)
   const params: Record<string, string> = {};
   if (filters.categoria) params.categoria = filters.categoria;
   if (filters.vencimientoAntesDe) params.vencimientoAntesDe = filters.vencimientoAntesDe;
@@ -73,5 +79,5 @@ export const fetchLotes = async (filters: LoteFilters): Promise<Lote[]> => {
 };
 // -----------------------------
 
-// 6. EXPORTAMOS 'api' PARA QUE OTROS COMPONENTES LO USEN
+// 6. EXPORTAMOS 'api' PARA QUE OTROS ARCHIVOS LO USEN
 export default api;

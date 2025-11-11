@@ -131,13 +131,7 @@ const LoteTable: React.FC = () => {
     setSelectedLote(null);
     fetchLotes();
   };
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  
 
   return (
     <>
