@@ -1,17 +1,23 @@
+
+.page {
+  background-color: white;
+  min-height: 100vh;
+}
+
+.container {
+  padding-bottom: 2rem;
+  padding-top: 2rem;
+}
+
 .loadingContainer {
   display: flex;
+  font-family: 'Roboto', sans-serif;
   justify-content: center;
   margin-bottom: 2.5rem;
   margin-top: 2.5rem;
 }
 
-.container {
-  margin-bottom: 2rem;
-  margin-top: 2rem;
-}
-
 .productCard {
-  border: 1px solid rgb(226, 225, 225);
   border-radius: 24px;
   display: flex;
   flex-direction: column;
@@ -20,11 +26,49 @@
 }
 
 .productImage {
-  border-radius: 24px;
-  flex: 0 0 40%;
-  height: 250px;
+  border-radius: 12px;
+  height: 320px;
   object-fit: cover;
-  width: 100%;
+  width: 320px;
+}
+
+.carouselLeft {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.carouselControls {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.thumbnailRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.thumbnail {
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  height: 60px;
+  object-fit: cover;
+  opacity: 0.8;
+  width: 60px;
+}
+
+.thumbnail.active {
+  border-color: #2A7C48;
+  opacity: 1;
+}
+
+.active {
+  border-color: #2A7C48;
+  opacity: 1;
 }
 
 .productDetailsColumn {
@@ -35,17 +79,22 @@
   justify-content: left;
   padding: 24px;
   text-align: left;
-  
 }
 
 .categoryChip {
+  background-color: #CFF7D3;
+  border-radius: 8px;
+  color: #02542D;
+  font-family: 'Roboto', sans-serif;
   margin-bottom: 0.5rem;
+  padding: 10px;
   width: fit-content;
 }
 
-.divider {
-  margin-bottom: 1rem;
-  margin-top: 1rem;
+.productHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .infoSection {
@@ -74,19 +123,19 @@
   text-decoration: line-through;
 }
 
-.addToCartContainer {
+.addToCartButton {
+  background-color: red;
+  color: white;
   margin-top: auto;
   padding-top: 1rem;
-}
-
-.addToCartButton {
   width: 100%;
 }
 
-.category {
-  align-content: center;
-  display: flex;
-  gap: 16px;
+.divider {
+  background-color: #E0E0E0;
+  height: 1px;
+  margin-top: 24px;
+  width: 100%;
 }
 
 /* --- Responsive styles for medium screens and up --- */
@@ -97,7 +146,7 @@
 
   .productImage {
       height: auto;
-      width: 400px;
+      width: 320px;
   }
 
   .addToCartButton {

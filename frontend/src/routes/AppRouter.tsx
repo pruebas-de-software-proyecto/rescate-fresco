@@ -6,6 +6,7 @@ import RegisterPage from '../pages/RegisterPage/RegisterPage';
 import LoginPage from '../pages/LoginPage/LoginPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import AppLayout from '../components/AppLayout'; // <-- 1. IMPORTA EL LAYOUT
+import { ReservationsPage } from '../pages/ReservationsPage';
 
 export default function AppRouter() {
   return (
@@ -32,6 +33,7 @@ export default function AppRouter() {
             path="/gestion-lotes"
             element={<ProtectedRoute element={<LotesGestionPage />} />}
           />
+           <Route path="/reservation" element={<ReservationsPage />} />
 
           {/* Aquí puedes añadir las rutas de /perfil y /contacto */}
 
