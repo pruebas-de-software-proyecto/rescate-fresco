@@ -150,7 +150,7 @@ npm run dev
 
 ### Videos explicativos
 - [Video Entrega 1](https://www.canva.com/design/DAG2RnPUEOQ/BS_yET5we7NbT49zyFzEKA/edit?utm_content=DAG2RnPUEOQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
-- [Video Entrega 2](https://www.canva.com/design/DAG4WjCe3kk/mriOZcj-kPJ8HNR86OTR0Q/edit?utm_content=DAG4WjCe3kk&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+- [Video Entrega 2](https://usmcl-my.sharepoint.com/:v:/g/personal/francisca_figueroal_usm_cl/EYrcq5AKakZJjlV81qxvQyABbX7_RWYWH3xfe7VfyM2u2w?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=gkHrbB)
 
 ## Licencia 📄
 
