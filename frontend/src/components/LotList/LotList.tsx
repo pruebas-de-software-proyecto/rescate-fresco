@@ -6,6 +6,7 @@ import { useDebounce } from "../../useDebounce";
 import { FilterSidebar } from "./FilterSidebar";
 import { LoteCard } from "./LoteCard";
 import { SearchBar } from "./SearchBar";
+import axios from "axios";
 
 const DEFAULT_CATEGORY = "Todos";
 
@@ -49,6 +50,16 @@ export default function LotList() {
     loadLotes();
   }, [categoryFilter, expiryDateFilter, debouncedSearchFilter]);
 
+  const handleReserve = async (lote: Lote) => {
+    try {
+      const response = await axios.post(`/api/reservas`, { loteId: lote._id });
+      navigate(`/pago/${response.data.reservaId}`);
+    } catch (error) {
+      alert("Error al reservar el lote. Puede que ya esté reservado.");
+      console.error(error);
+    }
+  };
+
   if (loading)
     return (
       <Box sx={{ textAlign: "center", mt: 5 }}>
@@ -89,7 +100,12 @@ export default function LotList() {
           }}
         >
           {lotes.map((lote) => (
-            <LoteCard key={lote._id} lote={lote} onView={() => navigate(`/${lote._id}`)} />
+            <LoteCard
+              key={lote._id}
+              lote={lote}
+              onView={() => navigate(`/${lote._id}`)}
+              onReserve={() => handleReserve(lote)} 
+            />
           ))}
         </Box>
       </Box>

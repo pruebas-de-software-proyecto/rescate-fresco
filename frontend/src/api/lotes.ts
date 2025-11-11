@@ -42,8 +42,10 @@ export interface Lote {
   precioRescate: number;
   fechaVencimiento: string;
   ventanaRetiro: string;
+  tienda: string;
   ubicacion: string;
   fotos: string[];
+  estado: 'Disponible' | 'reservado'; 
 }
 
 export interface LoteFilters {
@@ -53,6 +55,16 @@ export interface LoteFilters {
 }
 // ----------------------------------------
 
+export const fetchLotes = async (filters: LoteFilters): Promise<Lote[]> => {
+  const params: Record<string, string> = {};
+
+  if (filters.categoria) params.categoria = filters.categoria;
+  if (filters.vencimientoAntesDe) params.vencimientoAntesDe = filters.vencimientoAntesDe;
+  if (filters.nombre) params.nombre = filters.nombre;
+
+  const response = await axios.get('/api/lotes', {
+    params,
+    headers: {
 // --- 'fetchLotes' MODIFICADO ---
 export const fetchLotes = async (filters: LoteFilters): Promise<Lote[]> => {
   
@@ -70,10 +82,24 @@ export const fetchLotes = async (filters: LoteFilters): Promise<Lote[]> => {
     headers: { // Tus headers de caché
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
-      'Expires': '0'
-    }
+      'Expires': '0',
+    },
   });
 
+  return response.data.map((lote: Lote) => ({
+    ...lote,
+    estado: lote.estado || 'disponible',
+  }));
+};
+
+export const reservarLote = async (id: string): Promise<void> => {
+  try {
+    await axios.post(`/api/lotes/${id}/reservar`);
+  } catch (error) {
+    console.error('Error al reservar lote:', error);
+    throw error;
+  }
+};
   // Asumimos que tu API devuelve el array de lotes directamente
   return response.data;
 };
