@@ -1,10 +1,17 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import cron from "node-cron";
+import Lot from "./models/lotModels";
+
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import connectDB from './config/db';
 import lotRoutes from './routes/lotRoutes';
+import reservaRoutes from "./routes/reservaRoutes";
+import paymentRoutes from './routes/paymentRoutes';
+import authRoutes from './routes/auth.routes';
+import { protect } from './middleware/auth.middleware';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -15,6 +22,8 @@ connectDB();
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
+  'http://localhost:5173', // <-- 2. AÑADE ESTO (Vite usa el puerto 5173 por defecto)
+  'http://127.0.0.1:5173',
   'https://mango-mushroom-0e9b2f40f.3.azurestaticapps.net'
 ];
 
@@ -23,6 +32,41 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
+
+import Stripe from "stripe";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  async (req: Request, res: Response) => {
+    const sig = req.headers["stripe-signature"] as string;
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } catch (err: any) {
+      console.error("❌ Webhook error:", err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type === "payment_intent.succeeded") {
+      const pi = event.data.object as Stripe.PaymentIntent;
+      const lotId = pi.metadata.lotId;
+
+      try {
+        await Lot.findByIdAndUpdate(lotId, { estado: "reservado" });
+        console.log("✅ Lote marcado como reservado:", lotId);
+      } catch (err) {
+        console.error("Error actualizando lote:", err);
+      }
+    }
+
+    res.json({ received: true });
+  }
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -55,8 +99,12 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+app.use('/api/auth', authRoutes);
+
 // IMPORTANTE: Rutas de la API
 app.use('/api/lotes', lotRoutes);
+app.use("/api/reservas", reservaRoutes); 
+app.use('/api/payments', paymentRoutes);
 
 // Manejo de rutas no encontradas
 app.use((req: Request, res: Response) => {
@@ -81,6 +129,16 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor backend corriendo en puerto ${PORT}`);
   console.log(`📍 API disponible en http://localhost:${PORT}`);
   console.log(`📊 Documentación en http://localhost:${PORT}/api/lotes`);
+});
+
+cron.schedule("0 0 * * *", async () => {
+  console.log("Verificando lotes vencidos...");
+  const hoy = new Date();
+  await Lot.updateMany(
+    { fechaVencimiento: { $lt: hoy }, estado: { $ne: "vencido" } },
+    { $set: { estado: "vencido" } }
+  );
+  console.log("Lotes vencidos actualizados");
 });
 
 export default app;

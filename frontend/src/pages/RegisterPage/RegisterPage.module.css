@@ -1,0 +1,115 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+  
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  width: 39%;
+  min-width: 450px important;
+  flex-shrink: 0;
+
+  
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 350px;
+  
+}
+
+.title {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.loginLink {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.toggleButtons {
+  margin-bottom: 0.2rem;
+}
+
+.toggleButton {
+  border: 1px solid #E0E0E0;
+  background-color: #f5f5f5 !important;
+  display: flex;
+  flex-direction: column;
+  text-transform: none;
+}
+
+.toggleButtonSelected {
+  background-color: #2A7C48!important;
+  color: white !important;
+  display: flex;
+  flex-direction: column;
+  text-transform: none;
+}
+
+.toggleButtonSelected:hover {
+  background-color: #256b3f !important;
+}
+
+.inputGroup {
+  width: 100%;
+  height: auto;
+  margin-bottom: 1.25rem; /* Espacio entre cada campo (Nombre, Email, etc.) */
+  text-align: left; /* Alinea la etiqueta a la izquierda */
+}
+
+.inputLabel {
+  display: block; /* La etiqueta es un bloque */
+  margin-bottom: 0.5rem; /* Espacio entre etiqueta y campo */
+  font-weight: 600; /* O 400 si lo prefieres más delgado */
+  font-size: 0.9rem;
+  color: #333; /* Color oscuro para la etiqueta */
+}
+
+.inputField {
+  margin-bottom: 1.25rem !important;
+  width: 100%;
+}
+
+
+.submitButton {
+    margin-top: 1.5rem !important;
+    padding: 0.75rem;
+    background-color: #2A7C48 !important;
+    color: white;
+    width: 100%;
+    font-size: 1rem;
+    text-transform: none;
+}
+
+.submitButton:hover {
+  background-color: #256b3f !important;
+}
+
+.logoContainer {
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+
+.logo {
+  width: 220px;
+}
+
+.backgroundSection {
+  flex: 1;
+  background-size: cover;
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-color: #F4FAF4; 
+  transition: background-image 0.3s ease-in-out;
+}
