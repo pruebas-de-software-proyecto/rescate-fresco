@@ -1,0 +1,110 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
+import { fetchLotes } from '../api/lotes';
+import LotList from './LotList';
+// Mock del m贸dulo de navegaci贸n
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
+    return {
+        ...actual,
+        useNavigate: () => mockNavigate
+    };
+});
+// Mock de la API
+vi.mock('../api/lotes', () => ({
+    fetchLotes: vi.fn()
+}));
+// Datos de prueba
+const mockLotes = [
+    {
+        _id: '1',
+        nombre: 'Leche Descremada',
+        descripcion: 'Leche descremada marca Colun',
+        cantidad: 2,
+        unidad: 'litros', // debe ser uno de los valores literales permitidos
+        precioOriginal: 2000,
+        precioRescate: 1200,
+        fechaVencimiento: '2024-12-31',
+        ventanaRetiro: '10:00 - 13:00',
+        ubicacion: 'Supermercado A',
+        tienda: 'Supermercado A',
+        estado: 'Disponible',
+        fotos: ['http://example.com/leche.jpg'],
+        categoria: 'Lacteos',
+    },
+    {
+        _id: '2',
+        nombre: 'Pan Integral',
+        descripcion: 'Pan integral recien horneado',
+        cantidad: 1,
+        unidad: 'unidades', // debe ser uno de los valores literales permitidos
+        precioOriginal: 1500,
+        precioRescate: 800,
+        fechaVencimiento: '2024-12-30',
+        ventanaRetiro: '14:00 - 16:00',
+        ubicacion: 'Panaderia B',
+        tienda: 'Panaderia B',
+        estado: 'Disponible',
+        fotos: [],
+        categoria: 'Panaderia',
+    }
+];
+describe('LotList Component', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+    describe('Estados de carga', () => {
+        it('muestra el indicador de carga mientras obtiene los datos', async () => {
+            vi.mocked(fetchLotes).mockImplementation(() => new Promise(() => { }));
+            render(_jsx(BrowserRouter, { children: _jsx(LotList, {}) }));
+            expect(screen.getByText('Cargando lotes...')).toBeInTheDocument();
+            expect(screen.getByRole('progressbar')).toBeInTheDocument();
+        });
+        it('muestra mensaje cuando no hay lotes disponibles', async () => {
+            vi.mocked(fetchLotes).mockResolvedValue([]);
+            render(_jsx(BrowserRouter, { children: _jsx(LotList, {}) }));
+            await waitFor(() => {
+                expect(screen.getByText('No hay lotes disponibles. 馃様')).toBeInTheDocument();
+            });
+        });
+    });
+    describe('Visualizaci贸n de lotes', () => {
+        beforeEach(() => {
+            vi.mocked(fetchLotes).mockResolvedValue(mockLotes);
+        });
+        it('muestra correctamente los datos de cada lote', async () => {
+            render(_jsx(BrowserRouter, { children: _jsx(LotList, {}) }));
+            await waitFor(() => {
+                expect(screen.getByText('Leche Descremada')).toBeInTheDocument();
+                expect(screen.getByText('Pan Integral')).toBeInTheDocument();
+                expect(screen.getAllByText(/\$\d+/).length).toBe(2);
+            });
+            // Verificar fechas formateadas
+            const fecha = new Date('2024-12-31').toLocaleDateString();
+            expect(screen.getByText(`Vence: ${fecha}`)).toBeInTheDocument();
+        });
+        it('maneja correctamente los lotes sin im谩genes', async () => {
+            render(_jsx(BrowserRouter, { children: _jsx(LotList, {}) }));
+            await waitFor(() => {
+                expect(screen.getByText('Sin imagen')).toBeInTheDocument();
+            });
+        });
+    });
+    describe('Navegaci贸n', () => {
+        beforeEach(() => {
+            vi.mocked(fetchLotes).mockResolvedValue(mockLotes);
+        });
+        it('navega a la p谩gina de detalles al hacer click en Ver Detalles', async () => {
+            render(_jsx(BrowserRouter, { children: _jsx(LotList, {}) }));
+            await waitFor(() => {
+                expect(screen.getAllByText('Ver Detalles')).toHaveLength(2);
+            });
+            const primerBoton = screen.getAllByText('Ver Detalles')[0];
+            fireEvent.click(primerBoton);
+            expect(mockNavigate).toHaveBeenCalledWith('/1');
+        });
+    });
+});
