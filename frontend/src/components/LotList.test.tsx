@@ -1,8 +1,8 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import { fetchLotes, Lote } from '../api/lotes';
+import { BrowserRouter } from 'react-router-dom';
 import LotList from './LotList';
+import { fetchLotes, Lote } from '../api/lotes';
 
 // Mock del m贸dulo de navegaci贸n
 const mockNavigate = vi.fn();
@@ -32,26 +32,22 @@ const mockLotes: Lote[] = [
     fechaVencimiento: '2024-12-31',
     ventanaRetiro: '10:00 - 13:00',
     ubicacion: 'Supermercado A',
-    tienda: 'Supermercado A',
-    estado: 'Disponible',
     fotos: ['http://example.com/leche.jpg'],
-    categoria: 'Lacteos',
+    categoria: 'L谩cteos',
   },
   {
     _id: '2',
     nombre: 'Pan Integral',
-    descripcion: 'Pan integral recien horneado',
+    descripcion: 'Pan integral reci茅n horneado',
     cantidad: 1,
     unidad: 'unidades', // debe ser uno de los valores literales permitidos
     precioOriginal: 1500,
     precioRescate: 800,
     fechaVencimiento: '2024-12-30',
     ventanaRetiro: '14:00 - 16:00',
-    ubicacion: 'Panaderia B',
-    tienda: 'Panaderia B',
-    estado: 'Disponible',
+    ubicacion: 'Panader铆a B',
     fotos: [],
-    categoria: 'Panaderia',
+    categoria: 'Panader铆a',
   }
 ] as const;
 
