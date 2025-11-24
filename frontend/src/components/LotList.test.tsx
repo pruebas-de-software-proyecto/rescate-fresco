@@ -1,8 +1,8 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import LotList from './LotList';
+import { vi } from 'vitest';
 import { fetchLotes, Lote } from '../api/lotes';
+import LotList from './LotList';
 
 // Mock del m贸dulo de navegaci贸n
 const mockNavigate = vi.fn();
@@ -32,6 +32,8 @@ const mockLotes: Lote[] = [
     fechaVencimiento: '2024-12-31',
     ventanaRetiro: '10:00 - 13:00',
     ubicacion: 'Supermercado A',
+    tienda: 'Supermercado A',
+    estado: 'Disponible',
     fotos: ['http://example.com/leche.jpg'],
     categoria: 'L谩cteos',
   },
@@ -46,6 +48,8 @@ const mockLotes: Lote[] = [
     fechaVencimiento: '2024-12-30',
     ventanaRetiro: '14:00 - 16:00',
     ubicacion: 'Panader铆a B',
+    tienda: 'Panader铆a B',
+    estado: 'Disponible',
     fotos: [],
     categoria: 'Panader铆a',
   }
