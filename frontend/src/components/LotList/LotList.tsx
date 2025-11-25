@@ -1,12 +1,12 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
+import axios from "axios";
 import { useEffect, useState } from "react";
-import { fetchLotes, Lote, LoteFilters } from "../../api/lotes";
 import { useNavigate } from "react-router-dom";
+import { fetchLotes, Lote, LoteFilters } from "../../api/lotes";
 import { useDebounce } from "../../useDebounce";
 import { FilterSidebar } from "./FilterSidebar";
 import { LoteCard } from "./LoteCard";
 import { SearchBar } from "./SearchBar";
-import axios from "axios";
 
 const DEFAULT_CATEGORY = "Todos";
 
@@ -103,7 +103,7 @@ export default function LotList() {
             <LoteCard
               key={lote._id}
               lote={lote}
-              onView={() => navigate(`/${lote._id}`)}
+              onView={() => navigate(`/lotes/${lote._id}`)}
               onReserve={() => handleReserve(lote)} 
             />
           ))}

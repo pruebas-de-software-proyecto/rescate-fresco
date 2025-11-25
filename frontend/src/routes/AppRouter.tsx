@@ -23,7 +23,6 @@ export default function AppRouter() {
           <Route path="/" element={<LotesPage />} />
           <Route path="/lotes/:id" element={<DetailPage />} />
           <Route path="/pago/:id" element={<PagoPage />} />
-          
           {/* Rutas protegidas (con NavBar y autenticación) */}
           <Route
             path="/lotes-gestion"
