@@ -1,22 +1,24 @@
-import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function PagoPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [lote, setLote] = useState<any>(null);
 
+  const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
+
   // Cargar datos del lote
   useEffect(() => {
-    axios.get(`http://localhost:5001/api/lotes/${id}`)
+    axios.get(`${API_URL}/lotes/${id}`)
       .then(res => setLote(res.data))
       .catch(err => console.error(err));
   }, [id]);
 
   const handlePago = async () => {
     try {
-      const res = await axios.post("http://localhost:5001/api/payments/create-simulation", { lotId: id });
+      const res = await axios.post(`${API_URL}/payments/create-simulation`, { lotId: id });
       alert(`Pago simulado creado. Status: ${res.data.status}`);
       navigate("/"); // vuelve a la lista
     } catch (err) {
