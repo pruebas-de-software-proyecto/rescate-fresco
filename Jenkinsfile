@@ -1,18 +1,14 @@
 pipeline {
     agent any
+    tools {
+        nodejs 'node18'
+    }
 
     environment {
         CI = 'true'
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                echo '1. Clonando el repositorio...'
-                checkout scm
-            }
-        }
-
         stage('Install Backend Dependencies') {
             steps {
                 echo '2. Instalando dependencias del Backend...'
@@ -26,7 +22,6 @@ pipeline {
             steps {
                 echo '3. Ejecutando tests del Backend...'
                 dir('backend') {
-                    // Si tu comando de test es diferente (ej. 'npm run test:ci'), cámbialo aquí
                     sh 'npm test'
                 }
             }
@@ -34,7 +29,6 @@ pipeline {
 
         stage('Install Frontend Dependencies') {
             steps {
-                // Entra al directorio 'frontend' y corre 'npm install'
                 echo '4. Instalando dependencias del Frontend...'
                 dir('frontend') {
                     sh 'npm install'
@@ -44,11 +38,8 @@ pipeline {
 
         stage('Test Frontend') {
             steps {
-                // Corre los tests de Vitest
                 echo '5. Ejecutando tests del Frontend (Vitest)...'
                 dir('frontend') {
-                    // Usamos 'npm test -- --run' para que Vitest ejecute los tests una vez y termine
-                    // (el '--' pasa el argumento '--run' al script 'vitest')
                     sh 'npm test -- --run'
                 }
             }
@@ -56,8 +47,6 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                // "Construye" la aplicación de React/Vite
-                // Esto crea la carpeta 'dist' con los archivos estáticos (HTML, JS, CSS)
                 echo '6. Construyendo el Frontend (npm run build)...'
                 dir('frontend') {
                     sh 'npm run build'
@@ -69,15 +58,15 @@ pipeline {
             steps {
                 echo '7. Desplegando a la VM...'
                 /*
+                // Quita el comentario (uncomment) de esta sección y configura las credenciales
+                // cuando tengas tu clave SSH configurada en Jenkins (ID: 'vm-ssh-key')
                 sshagent(credentials: ['vm-ssh-key']) {
+                    // Asegúrate de usar la IP y ruta correctas
                     sh 'scp -o StrictHostKeyChecking=no -r backend/* usuario@tu-vm-ip:/ruta/en/vm/rescate-fresco/backend/'
-
                     sh 'scp -o StrictHostKeyChecking=no -r frontend/dist/* usuario@tu-vm-ip:/ruta/en/vm/rescate-fresco/frontend/dist/'
-
                     sh 'ssh usuario@tu-vm-ip "cd /ruta/en/vm/rescate-fresco/backend && npm install --production && pm2 restart tu-app"'
                 }
                 */
-                
                 echo '¡Despliegue de ejemplo completado!'
             }
         }
@@ -85,7 +74,6 @@ pipeline {
 
     post {
         always {
-
             echo 'Limpiando el workspace...'
             cleanWs()
         }
