@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Document, Schema, model } from 'mongoose';
 
 export interface ILot extends Document {
   nombre: string;
@@ -18,6 +18,7 @@ export interface ILot extends Document {
   retiroLimite?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
+  codigoRetiro?: string | null;
 }
 
 const lotSchema = new Schema<ILot>(
@@ -49,6 +50,7 @@ const lotSchema = new Schema<ILot>(
     },
     holdExpiresAt: { type: Date, default: null },
     retiroLimite: { type: Date, default: null },
+    codigoRetiro: { type: String, default: null },
   },
   { timestamps: true }
 );

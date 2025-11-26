@@ -86,8 +86,8 @@ export const deleteLote = async (req: Request, res: Response) => {
 
 export const reservarLote = async (req: Request, res: Response) => {
   try {
-    const { loteId } = req.body;
-    const lote = await Lot.findById(loteId);
+    const { id } = req.params;
+    const lote = await Lot.findById(id);
     if (!lote) return res.status(404).json({ error: "Lote no encontrado" });
     if (lote.estado !== "Disponible")
       return res.status(400).json({ error: "El lote no está disponible" });
@@ -102,7 +102,7 @@ export const reservarLote = async (req: Request, res: Response) => {
       lote,
     });
   } catch (error) {
-    res.status(500).json({ error: "Error al reservar lote" });
+    res.status(500).json({ error: "Error al reservar lote", details: error });
   }
 };
 
@@ -133,5 +133,30 @@ export const pagarLote = async (req: Request, res: Response) => {
     });
   } catch (error) {
     res.status(500).json({ error: "Error al procesar el pago" });
+  }
+};
+
+export const generarCodigoRetiro = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const codigo = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const lote = await Lot.findByIdAndUpdate(
+      id,
+      { codigoRetiro: codigo },
+      { new: true }
+    );
+
+    if (!lote) {
+      return res.status(404).json({ error: "Lote no encontrado" });
+    }
+    res.json({
+      message: "Código generado correctamente",
+      codigoRetiro: lote.codigoRetiro,
+      loteId: lote._id
+    });
+
+  } catch (error) {
+    console.error("Error al generar PIN:", error);
+    res.status(500).json({ error: "Error interno al generar el código" });
   }
 };

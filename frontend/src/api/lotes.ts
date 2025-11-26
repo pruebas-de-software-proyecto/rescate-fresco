@@ -38,15 +38,18 @@ export interface Lote {
   fechaVencimiento: string;
   ventanaRetiro: string;
   tienda: string;
+  proveedor?: string;
   ubicacion: string;
   fotos: string[];
   estado: 'Disponible' | 'reservado'; 
+  codigoRetiro?: string;
 }
 
 export interface LoteFilters {
   categoria?: string;
   vencimientoAntesDe?: string;
   nombre?: string;
+  estado?: string;
 }
 
 // Funciones del API
@@ -59,6 +62,7 @@ export const fetchLotes = async (filters: LoteFilters): Promise<Lote[]> => {
   if (filters.categoria) params.categoria = filters.categoria;
   if (filters.vencimientoAntesDe) params.vencimientoAntesDe = filters.vencimientoAntesDe;
   if (filters.nombre) params.nombre = filters.nombre;
+  if (filters.estado) params.estado = filters.estado;
   
   // Usamos la instancia 'api' configurada con baseURL y token
   const response = await api.get('/lotes', {
@@ -97,6 +101,18 @@ export const reservarLote = async (id: string): Promise<void> => {
     throw error;
   }
 };
+
+export const generarPin = async (id: string): Promise<{ codigoRetiro: string }> => {
+  try {
+    const response = await api.post(`/lotes/${id}/generar-pin`);
+    // Retornamos la data que contiene el codigoRetiro
+    return response.data;
+  } catch (error) {
+    console.error('Error al generar PIN:', error);
+    throw error;
+  }
+};
+
 
 // Exportar instancia de API configurada
 export default api;

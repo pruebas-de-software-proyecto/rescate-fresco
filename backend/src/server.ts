@@ -1,39 +1,43 @@
 import dotenv from 'dotenv';
-dotenv.config();
-
-import cron from "node-cron";
-import Lot from "./models/lotModels";
+dotenv.config(); // Configurar dotenv al principio
 
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
+import cron from "node-cron";
+import Stripe from "stripe";
+
+// Configuración y Modelos
 import connectDB from './config/db';
-import lotRoutes from './routes/lotRoutes';
-import reservaRoutes from "./routes/reservaRoutes";
-import paymentRoutes from './routes/paymentRoutes';
+import Lot from "./models/lotModels";
+
+// Importación de Rutas
 import authRoutes from './routes/auth.routes';
-import { protect } from './middleware/auth.middleware';
+import lotRoutes from './routes/lotRoutes';
+import paymentRoutes from './routes/paymentRoutes';
+import reservaRoutes from "./routes/reservaRoutes";
+import tiendaRoutes from './routes/tiendaRoutes'; // <--- Importado aquí arriba
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Conectar a la base de datos
+// 1. Conectar a la base de datos
 connectDB();
 
+// 2. Configuración de CORS
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
-  'http://localhost:5173', // <-- 2. AÑADE ESTO (Vite usa el puerto 5173 por defecto)
+  'http://localhost:5173',
   'http://127.0.0.1:5173',
   'https://mango-mushroom-0e9b2f40f.3.azurestaticapps.net'
 ];
 
-// Middlewares
 app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
 
-import Stripe from "stripe";
+// 3. Configuración de Stripe (Webhook debe ir ANTES del express.json)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -67,16 +71,17 @@ app.post(
   }
 );
 
+// 4. Middlewares globales
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware para logging de requests
+// Logging de requests
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
   next();
 });
 
-// Ruta raíz
+// 5. Rutas Base
 app.get('/', (req: Request, res: Response) => {
   res.json({
     message: '✅ API de Rescate Fresco',
@@ -90,7 +95,6 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-// Health check
 app.get('/health', (req: Request, res: Response) => {
   res.json({ 
     status: 'healthy',
@@ -99,14 +103,15 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+// 6. RUTAS DE LA API (El orden importa)
 app.use('/api/auth', authRoutes);
-
-// IMPORTANTE: Rutas de la API
 app.use('/api/lotes', lotRoutes);
 app.use("/api/reservas", reservaRoutes); 
 app.use('/api/payments', paymentRoutes);
+app.use('/api/tiendas', tiendaRoutes); // <--- ¡AQUÍ ESTÁ LA CORRECCIÓN! (Antes del 404)
 
-// Manejo de rutas no encontradas
+// 7. Manejo de errores (Catch-All)
+// Si ninguna ruta anterior coincidió, cae aquí (404)
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
@@ -114,7 +119,7 @@ app.use((req: Request, res: Response) => {
   });
 });
 
-// Manejo de errores global
+// Manejo de errores global (500)
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('❌ Error:', err.stack);
   res.status(500).json({
@@ -124,13 +129,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor backend corriendo en puerto ${PORT}`);
-  console.log(`📍 API disponible en http://localhost:${PORT}`);
-  console.log(`📊 Documentación en http://localhost:${PORT}/api/lotes`);
-});
-
+// 8. Cron Jobs
 cron.schedule("0 0 * * *", async () => {
   console.log("Verificando lotes vencidos...");
   const hoy = new Date();
@@ -139,6 +138,12 @@ cron.schedule("0 0 * * *", async () => {
     { $set: { estado: "vencido" } }
   );
   console.log("Lotes vencidos actualizados");
+});
+
+// 9. Iniciar servidor
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor backend corriendo en puerto ${PORT}`);
+  console.log(`📍 API disponible en http://localhost:${PORT}`);
 });
 
 export default app;

@@ -42,6 +42,7 @@ export interface Lote {
   observaciones?: string;
   createdAt?: string;
   updatedAt?: string;
+  codigoRetiro?: string;
 }
 
 export interface ApiResponse<T> {
@@ -125,6 +126,12 @@ class LotesAPI {
     const response = await api.get('/lotes/stats');
     return response.data;
   }
+  
+  async generarPin(id: string): Promise<{ codigoRetiro: string }> {
+    const response = await api.post(`/lotes/${id}/generar-pin`);
+    return response.data;
+  }
+
 }
 
 export default new LotesAPI();

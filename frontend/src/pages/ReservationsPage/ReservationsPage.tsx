@@ -3,31 +3,33 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardMedia,
-  CircularProgress,
-  Container,
-  Divider,
-  Grid,
-  Typography
+    Alert,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    CardMedia,
+    CircularProgress,
+    Container,
+    Divider,
+    Grid,
+    Typography
 } from '@mui/material';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 
-import NavBar from '../../components/NavBar';
-import FullLotesAPI, { FullLote } from '../../services/types';
+import { useNavigate } from 'react-router-dom';
+import { fetchLotes, Lote, LoteFilters } from '../../api/lotes';
+import FullLotesAPI from '../../services/types';
 import styles from './ReservationsPage.module.css';
 
 export default function ReservationsPage() {
-    const [reservedProducts, setReservedProducts] = useState<FullLote[]>([]);
+    const [reservedProducts, setReservedProducts] = useState<Lote[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [cancellingId, setCancellingId] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchReservedProducts();
@@ -38,13 +40,12 @@ export default function ReservationsPage() {
             setLoading(true);
             setError(null);
             
-            // Obtener todos los productos del backend
             const allProducts = await FullLotesAPI.getAll();
             
-            // Filtrar solo los productos con estado "Reservado"
-            const reservedProducts = allProducts.filter(product => 
-                product.estado === 'Reservado'
-            );
+            const filters: LoteFilters = { estado: 'reservado' };
+            console.log("🔍 Todos los productos:", allProducts);
+            const reservedProducts = await fetchLotes(filters);
+            console.log("✅ Productos reservados:", reservedProducts);
             
             setReservedProducts(reservedProducts);
         } catch (err: any) {
@@ -53,6 +54,10 @@ export default function ReservationsPage() {
             setLoading(false);
         }
     };
+
+    const handleCodigoRetiro = (codigoRetiro?: string, productId?: string) => {
+        navigate(`/pago/${productId}/${codigoRetiro}`);
+    }
 
     const handleCancelReservation = async (productId: string, productName: string) => {
         if (!window.confirm(`¿Estás seguro de que quieres cancelar la reserva de "${productName}"?`)) {
@@ -65,7 +70,6 @@ export default function ReservationsPage() {
             // Actualizar el estado del producto a "Disponible" usando la API
             await FullLotesAPI.update(productId, { estado: 'Disponible' });
             
-            // Actualizar la lista local removiendo el producto cancelado
             setReservedProducts(prev => prev.filter(product => product._id !== productId));
             
             alert(`La reserva de "${productName}" ha sido cancelada exitosamente.`);
@@ -92,7 +96,6 @@ export default function ReservationsPage() {
     if (loading) {
         return (
             <div className={styles.page}>
-                <NavBar />
                 <Container maxWidth="lg" className={styles.container}>
                     <Box className={styles.loadingContainer}>
                         <CircularProgress />
@@ -106,7 +109,6 @@ export default function ReservationsPage() {
     if (error) {
         return (
             <div className={styles.page}>
-                <NavBar />
                 <Container maxWidth="lg" className={styles.container}>
                     <Alert severity="error" sx={{ mt: 2 }}>
                         {error}
@@ -131,11 +133,10 @@ export default function ReservationsPage() {
 
     return (
         <div className={styles.page}>
-            <NavBar />
             <Container maxWidth="lg" className={styles.container}>
                 <Box className={styles.header}>
                     <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom className={styles.headerTitle}>
-                        Mis Reservaciones
+                        Mis Reservas
                     </Typography>
                     <Typography variant="body1" color="textSecondary" paragraph>
                         Aquí puedes ver todos tus productos reservados y gestionar tus reservas.
@@ -201,6 +202,7 @@ export default function ReservationsPage() {
                                                     <strong>Tienda:</strong> {product.proveedor}
                                                 </Typography>
                                             </Box>
+
                                         </Box>
 
                                         <Typography variant="body2" color="textSecondary" gutterBottom>
@@ -208,7 +210,14 @@ export default function ReservationsPage() {
                                         </Typography>
 
                                         <Divider sx={{ my: 1.5 }} />
-
+                                        
+                                        <Button
+                                            variant='outlined'
+                                            sx={{ backgroundColor: '#2E7D32', borderColor: '#2E7D32', color: 'white', mb: 1 }}
+                                            fullWidth
+                                            onClick={() => handleCodigoRetiro(product.codigoRetiro, product._id)}>
+                                            Ver código de retiro
+                                        </Button>
                                         <Button
                                             variant="outlined"
                                             color="error"

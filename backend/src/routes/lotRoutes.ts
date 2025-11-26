@@ -1,5 +1,5 @@
 import express from 'express';
-import { createLote, getLoteById, getLotes, actualizarLote, deleteLote, reservarLote, pagarLote } from '../controllers/lotController';
+import { actualizarLote, createLote, deleteLote, generarCodigoRetiro, getLoteById, getLotes, pagarLote, reservarLote } from '../controllers/lotController';
 
 const router = express.Router();
 
@@ -12,5 +12,7 @@ router.delete('/:id', deleteLote); // Eliminar lote
 
 router.post("/:id/reservar", reservarLote); // Reservar lote
 router.post("/:id/pagar", pagarLote); // Pagar lote 
+router.post("/:id/generar-pin", generarCodigoRetiro); // Generar código de retiro
+
 
 export default router;
