@@ -1,12 +1,5 @@
-// 1. IMPORTAMOS la instancia 'api' CORRECTA (la que tiene el token)
 import api from '../api/lotes';
 
-// 2. ELIMINAMOS las constantes duplicadas. 'api' ya tiene la URL base.
-// (No hay 'axios' ni 'API_BASE_URL' aquí)
-
-// --------------------
-
-// 3. ¡LA INTERFAZ COMPLETA! (Aquí estaba el error)
 export interface FullLote {
   _id: string;
   nombre: string;

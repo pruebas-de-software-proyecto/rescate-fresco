@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { generarPin, reservarLote } from "../api/lotes";
 
 export default function PagoPage() {
   const { id } = useParams();
@@ -19,8 +20,12 @@ export default function PagoPage() {
   const handlePago = async () => {
     try {
       const res = await axios.post(`${API_URL}/payments/create-simulation`, { lotId: id });
+      await reservarLote(id!);
+      const respuesta = await generarPin(id!);
+      const codigo = respuesta.codigoRetiro;
+      console.log(codigo);
       alert(`Pago simulado creado. Status: ${res.data.status}`);
-      navigate("/"); // vuelve a la lista
+      navigate(`/pago/${id}/${codigo}`);
     } catch (err) {
       console.error(err);
       alert("Error creando pago simulado");
