@@ -23,10 +23,9 @@ describe('FilterControls', () => {
   it('debería renderizar todos los elementos de filtro correctamente', () => {
     renderFilterControls();
 
-    expect(screen.getByText('Opciones de Búsqueda y Filtrado')).toBeInTheDocument();
-    expect(screen.getByLabelText(/buscar por nombre del lote/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/buscar/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/categoría/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/vence antes de/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/vence luego de/i)).toBeInTheDocument();
     
     // El botón reset no debería aparecer inicialmente
     expect(screen.queryByText('Resetear')).not.toBeInTheDocument();
@@ -79,7 +78,7 @@ describe('FilterControls', () => {
     const setExpiryDateFilter = vi.fn();
     renderFilterControls({ setExpiryDateFilter });
 
-    const dateInput = screen.getByLabelText(/vence antes de/i);
+    const dateInput = screen.getByLabelText(/vence luego de/i);
     await user.type(dateInput, '2025-12-31');
 
     expect(setExpiryDateFilter).toHaveBeenCalledWith('2025-12-31');
@@ -160,8 +159,7 @@ describe('FilterControls', () => {
   it('debería mostrar los iconos correspondientes', () => {
     renderFilterControls();
 
-    // Verificar que los iconos estén presentes (por sus data-testids)
-    expect(screen.getByTestId('FilterListIcon')).toBeInTheDocument();
+    // Verificar que el icono de búsqueda esté presente
     expect(screen.getByTestId('SearchIcon')).toBeInTheDocument();
   });
 
@@ -176,7 +174,7 @@ describe('FilterControls', () => {
     });
 
     // Cambiar búsqueda
-    const searchInput = screen.getByLabelText(/buscar por nombre del lote/i);
+    const searchInput = screen.getByLabelText(/buscar/i);
     await user.type(searchInput, 'test');
     
     // Cambiar categoría

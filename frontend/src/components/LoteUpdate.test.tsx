@@ -1,8 +1,10 @@
 // frontend/src/components/LoteUpdate.test.tsx
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import LoteTable from './loteTable';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AuthProvider } from '../context/AuthContext';
 import FullLotesAPI, { FullLote } from '../services/types';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import LoteTable from './loteTable';
 
 // Mock de datos de prueba
 const LoteTest: FullLote = {
@@ -18,8 +20,17 @@ const LoteTest: FullLote = {
   ventanaRetiro: '10:00 - 13:00',
   ubicacion: 'Tienda Vaquita Feliz',
   fotos: ['https://example.com/peras.jpg'],
-  estado: 'Disponible',    
+  estado: 'Disponible',
   proveedor: 'Colun',
+};
+
+// Helper para renderizar con providers
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(
+    <AuthProvider>
+      {component}
+    </AuthProvider>
+  );
 };
 
 // Mock de FullLotesAPI
@@ -40,7 +51,7 @@ describe('Feature Update Lote', () => {
 
   describe('Visualización de datos', () => {
     it('carga los lotes en la tabla', async () => {
-      render(<LoteTable />);
+      renderWithProviders(<LoteTable />);
       const nombre = await screen.findByText('Leche sin lactosa');
       expect(nombre).toBeInTheDocument();
       expect(screen.getByText('Lácteos')).toBeInTheDocument();
@@ -48,7 +59,7 @@ describe('Feature Update Lote', () => {
     });
 
     it('abre el formulario con datos precargados al hacer click en editar', async () => {
-      render(<LoteTable />);
+      renderWithProviders(<LoteTable />);
       const editButton = await screen.findByRole('button', { name: /edit/i });
       await act(async () => {
         fireEvent.click(editButton);
@@ -62,7 +73,7 @@ describe('Feature Update Lote', () => {
 
   describe('Validaciones de edición', () => {
     it('no permite precio de rescate mayor al original', async () => {
-      render(<LoteTable />);
+      renderWithProviders(<LoteTable />);
       const editButton = await screen.findByRole('button', { name: /edit/i });
       
       await act(async () => {
@@ -95,7 +106,7 @@ describe('Feature Update Lote', () => {
       const updateMock = vi.spyOn(FullLotesAPI, 'update')
         .mockResolvedValue(updatedLote);
 
-      render(<LoteTable />);
+      renderWithProviders(<LoteTable />);
       await screen.findByText('Leche sin lactosa');
       const editButton = await screen.findByRole('button', { name: /edit/i });
 
@@ -133,7 +144,7 @@ describe('Feature Update Lote', () => {
     });
     
     it('no permite fecha de vencimiento anterior a la actual', async () => {
-    render(<LoteTable />);
+    renderWithProviders(<LoteTable />);
     const editButton = await screen.findByRole('button', { name: /edit/i });
     
     await act(async () => {
@@ -166,7 +177,7 @@ describe('Feature Update Lote', () => {
           precioRescate: 1300
         });
 
-      render(<LoteTable />);
+      renderWithProviders(<LoteTable />);
       await screen.findByText('Leche sin lactosa');
       const editButton = await screen.getByRole('button', { name: /edit/i });
 
@@ -193,7 +204,7 @@ describe('Feature Update Lote', () => {
     });
 
     it('cierra el formulario al guardar', async () => {
-      render(<LoteTable />);
+      renderWithProviders(<LoteTable />);
       const editButton = await screen.findByRole('button', { name: /edit/i });
 
       await act(async () => {

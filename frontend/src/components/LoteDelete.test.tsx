@@ -1,8 +1,10 @@
 // frontend/src/components/LoteTable.test.tsx
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import LoteTable from './loteTable';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AuthProvider } from '../context/AuthContext';
 import FullLotesAPI, { FullLote } from '../services/types';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import LoteTable from './loteTable';
 
 // Lote de prueba
 const LoteTest: FullLote = {
@@ -22,6 +24,15 @@ const LoteTest: FullLote = {
   proveedor: 'Colun',
 };
 
+// Helper para renderizar con providers
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(
+    <AuthProvider>
+      {component}
+    </AuthProvider>
+  );
+};
+
 // Mocks
 vi.spyOn(FullLotesAPI, 'getAll').mockResolvedValue([LoteTest]);
 const deleteMock = vi.spyOn(FullLotesAPI, 'delete').mockResolvedValue(LoteTest);
@@ -33,7 +44,7 @@ describe('Feature Delete Lote', () => {
 
   it('muestra diálogo de confirmación al intentar eliminar', async () => {
     const confirmSpy = vi.spyOn(window, 'confirm');
-    render(<LoteTable />);
+    renderWithProviders(<LoteTable />);
     
     const deleteButton = await screen.findByRole('button', { name: /delete/i });
     await act(async () => {
@@ -45,7 +56,7 @@ describe('Feature Delete Lote', () => {
 
   it('elimina el lote cuando se confirma la acción', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true);
-    render(<LoteTable />);
+    renderWithProviders(<LoteTable />);
     
     const deleteButton = await screen.findByRole('button', { name: /delete/i });
     await act(async () => {
@@ -59,7 +70,7 @@ describe('Feature Delete Lote', () => {
 
   it('no elimina el lote cuando se cancela la acción', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(false);
-    render(<LoteTable />);
+    renderWithProviders(<LoteTable />);
     
     const deleteButton = await screen.findByRole('button', { name: /delete/i });
     await act(async () => {
