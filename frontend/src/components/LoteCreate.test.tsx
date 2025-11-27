@@ -1,27 +1,39 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import FullLotesAPI from '../services/types';
 import LoteCreateDialog from './LoteCreateDialog';
 
-const createMock = vi.spyOn(FullLotesAPI, 'create').mockResolvedValue({
-  data: {
-    _id: 'test123',
-    nombre: 'Peras verdes',
-    categoria: 'Frutas',
-    descripcion: 'Peras frescas',
-    cantidad: 10,
-    unidad: 'kg',
-    precioOriginal: 4000,
-    precioRescate: 1500,
-    fechaVencimiento: '2025-12-01',
-    ventanaRetiro: '10:00 - 13:00',
-    ubicacion: 'Mercado Central',
-    proveedor: 'Frutera Don Pepe',
-    estado: 'Disponible',
-    fotos: [],
-  },
-});
+// Mock del FullLotesAPI
+vi.mock('../services/types', () => ({
+  default: {
+    create: vi.fn().mockResolvedValue({
+      data: {
+        _id: 'test123',
+        nombre: 'Peras verdes',
+        categoria: 'Frutas',
+        descripcion: 'Peras frescas',
+        cantidad: 10,
+        unidad: 'kg',
+        precioOriginal: 4000,
+        precioRescate: 1500,
+        fechaVencimiento: '2025-12-01',
+        ventanaRetiro: '10:00 - 13:00',
+        ubicacion: 'Mercado Central',
+        proveedor: 'Frutera Don Pepe',
+        estado: 'Disponible',
+        fotos: [],
+      },
+    }),
+    getAll: vi.fn(),
+    getById: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+  }
+}));
+
+// Importar después del mock para obtener la versión mockeada
+import FullLotesAPI from '../services/types';
+const mockCreate = vi.mocked(FullLotesAPI.create);
 
 const renderDialog = () =>
   render(
@@ -49,7 +61,7 @@ describe('Feature Create - LoteCreateDialog', () => {
     expect(await screen.findByText(/no puede estar vacío/i))
       .toBeInTheDocument();
 
-    expect(createMock).not.toHaveBeenCalled();
+    expect(mockCreate).not.toHaveBeenCalled();
   });
 
   // TEST 2: Números negativos
@@ -81,10 +93,10 @@ describe('Feature Create - LoteCreateDialog', () => {
     const submitButton = screen.getByRole('button', { name: /crear lote/i });
     await user.click(submitButton);
 
-    expect(await screen.findByText(/debe ser un número mayor a 0/i))
+    expect(await screen.findByText(/debe ser un número mayor a 0/i, {}, { timeout: 3000 }))
       .toBeInTheDocument();
 
-    expect(createMock).not.toHaveBeenCalled();
+    expect(mockCreate).not.toHaveBeenCalled();
   });
 
   // TEST 3: Fecha de vencimiento anterior a hoy
@@ -135,7 +147,7 @@ describe('Feature Create - LoteCreateDialog', () => {
     expect(await screen.findByText('La fecha de vencimiento no puede ser anterior a la fecha actual.'))
       .toBeInTheDocument();
 
-    expect(createMock).not.toHaveBeenCalled();
+    expect(mockCreate).not.toHaveBeenCalled();
   });
 
   // TEST 4: Precio de rescate mayor o igual al precio original
@@ -189,7 +201,7 @@ describe('Feature Create - LoteCreateDialog', () => {
     expect(await screen.findByText('El precio de rescate debe ser menor que el precio original.'))
       .toBeInTheDocument();
 
-    expect(createMock).not.toHaveBeenCalled();
+    expect(mockCreate).not.toHaveBeenCalled();
   });
 
   // TEST 5: Flujo correcto - Crear lote exitosamente
@@ -235,10 +247,10 @@ describe('Feature Create - LoteCreateDialog', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(createMock).toHaveBeenCalledTimes(1);
+      expect(mockCreate).toHaveBeenCalledTimes(1);
     }, { timeout: 10000 });
 
-    const payload = createMock.mock.calls[0][0];
+    const payload = mockCreate.mock.calls[0][0];
     expect(payload.nombre).toBe('Peras verdes');
     expect(payload.cantidad).toBe(10);
     expect(payload.precioRescate).toBe(1500);

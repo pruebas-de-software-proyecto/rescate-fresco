@@ -1,15 +1,29 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import axios from "axios";
-import PagoPage from "./PagoPage";
+import { BrowserRouter } from "react-router-dom";
 import { vi } from "vitest";
+import PagoPage from "./PagoPage";
 
 // 👇 Mockeamos axios
 vi.mock("axios");
 const mockedAxios = axios as unknown as {
   get: ReturnType<typeof vi.fn>;
   post: ReturnType<typeof vi.fn>;
+  create: ReturnType<typeof vi.fn>;
 };
+
+// Mockeamos axios.create para que devuelva un objeto con interceptors y métodos
+const mockAxiosInstance = {
+  get: vi.fn(),
+  post: vi.fn(),
+  interceptors: {
+    request: {
+      use: vi.fn()
+    }
+  }
+};
+
+mockedAxios.create = vi.fn().mockReturnValue(mockAxiosInstance);
 
 // 👇 Mockeamos useParams y useNavigate
 vi.mock("react-router-dom", async () => {
@@ -21,12 +35,19 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+// 👇 Mockeamos las funciones de la API
+vi.mock("../api/lotes", () => ({
+  generarPin: vi.fn().mockResolvedValue({ codigoRetiro: "ABC123" }),
+  reservarLote: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe("PagoPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("muestra los datos del lote después de cargarlos", async () => {
+    // Mockeamos la llamada axios.get que se hace directamente en el componente
     mockedAxios.get.mockResolvedValueOnce({
       data: { nombre: "Lote de Prueba", precioRescate: 15000, fechaVencimiento: "2025-12-10T00:00:00Z" },
     });
@@ -45,9 +66,12 @@ describe("PagoPage", () => {
   });
 
   it("simula un pago correctamente", async () => {
+    // Mock para cargar datos del lote
     mockedAxios.get.mockResolvedValueOnce({
       data: { nombre: "Lote 1", precioRescate: 20000, fechaVencimiento: "2025-12-10T00:00:00Z" },
     });
+    
+    // Mock para el pago
     mockedAxios.post.mockResolvedValueOnce({
       data: { status: "success" },
     });

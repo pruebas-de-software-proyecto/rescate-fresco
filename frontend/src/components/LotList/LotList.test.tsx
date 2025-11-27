@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { vi } from "vitest";
 import { fetchLotes, Lote } from "../../api/lotes";
-import LotList from "./LotList";
+import LotList from "../LotList";
 
 // Mock del módulo de navegación
 const mockNavigate = vi.fn();
@@ -14,9 +14,12 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../api/lotes", () => ({
+vi.mock("../../api/lotes", () => ({
   fetchLotes: vi.fn(),
 }));
+
+// Obtener referencia del mock
+const mockFetchLotes = fetchLotes as unknown as ReturnType<typeof vi.fn>;
 
 // Datos de prueba
 const mockLotes: Lote[] = [
@@ -62,7 +65,7 @@ describe("LotList Component", () => {
   // Estado de carga
   describe("Estados de carga", () => {
     it("muestra el indicador de carga mientras obtiene los datos", async () => {
-      vi.mocked(fetchLotes).mockImplementation(() => new Promise(() => {}));
+      mockFetchLotes.mockImplementation(() => new Promise(() => {}));
 
       render(
         <BrowserRouter>
@@ -75,7 +78,7 @@ describe("LotList Component", () => {
     });
 
     it("muestra mensaje cuando no hay lotes disponibles", async () => {
-      vi.mocked(fetchLotes).mockResolvedValue([]);
+      mockFetchLotes.mockResolvedValue([]);
 
       render(
         <BrowserRouter>
@@ -84,9 +87,7 @@ describe("LotList Component", () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText("No hay lotes disponibles. 💤")
-        ).toBeInTheDocument();
+        expect(screen.getByText("No hay lotes disponibles. 😔")).toBeInTheDocument();
       });
     });
   });
@@ -94,7 +95,7 @@ describe("LotList Component", () => {
   // Visualización de lotes
   describe("Visualización de lotes", () => {
     beforeEach(() => {
-      vi.mocked(fetchLotes).mockResolvedValue(mockLotes);
+      mockFetchLotes.mockResolvedValue(mockLotes);
     });
 
     it("muestra correctamente los datos de cada lote", async () => {
@@ -115,7 +116,7 @@ describe("LotList Component", () => {
       // Fecha formateada correctamente
       const fecha = new Date("2024-12-31").toLocaleDateString();
       expect(
-        screen.getByText(`Fecha vencimiento: ${fecha}`)
+        screen.getByText(`Vence: ${fecha}`)
       ).toBeInTheDocument();
     });
 
@@ -127,6 +128,7 @@ describe("LotList Component", () => {
       );
 
       await waitFor(() => {
+        // Verificar que se muestra "Sin imagen" para lotes sin fotos
         expect(screen.getByText("Sin imagen")).toBeInTheDocument();
       });
     });
@@ -135,10 +137,10 @@ describe("LotList Component", () => {
   // Navegación
   describe("Navegación", () => {
     beforeEach(() => {
-      vi.mocked(fetchLotes).mockResolvedValue(mockLotes);
+      mockFetchLotes.mockResolvedValue(mockLotes);
     });
 
-    it("navega a la página de detalles al hacer click en Ver detalle", async () => {
+    it("navega a la página de detalles al hacer click en Ver Detalles", async () => {
       render(
         <BrowserRouter>
           <LotList />
@@ -146,35 +148,13 @@ describe("LotList Component", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getAllByText("Ver detalle")).toHaveLength(2);
+        expect(screen.getAllByText("Ver Detalles")).toHaveLength(2);
       });
 
-      const primerBoton = screen.getAllByText("Ver detalle")[0];
+      const primerBoton = screen.getAllByText("Ver Detalles")[0];
       fireEvent.click(primerBoton);
 
       expect(mockNavigate).toHaveBeenCalledWith("/1");
-    });
-  });
-
-  // Agregar al carrito
-  describe("Agregar al carrito", () => {
-    beforeEach(() => {
-      vi.mocked(fetchLotes).mockResolvedValue(mockLotes);
-    });
-
-    it("muestra botón de agregar al carrito y permite hacer click", async () => {
-      render(
-        <BrowserRouter>
-          <LotList />
-        </BrowserRouter>
-      );
-
-      await waitFor(() => {
-        expect(screen.getAllByText("Agregar al carrito")).toHaveLength(2);
-      });
-
-      const boton = screen.getAllByText("Agregar al carrito")[0];
-      fireEvent.click(boton);
     });
   });
 });

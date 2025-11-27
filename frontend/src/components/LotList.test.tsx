@@ -84,7 +84,7 @@ describe('LotList Component', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('No hay lotes disponibles. 馃様')).toBeInTheDocument();
+        expect(screen.getByText('No hay lotes disponibles. 😔')).toBeInTheDocument();
       });
     });
   });
