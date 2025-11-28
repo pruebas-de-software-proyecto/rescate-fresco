@@ -2,15 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { IUser } from '../models/user.model'; // Importamos nuestra interfaz de usuario
 
-// Definimos un tipo para el payload que está dentro del token
 interface JwtPayload {
   id: string;
   role: 'CONSUMIDOR' | 'TIENDA';
   email: string;
 }
 
-// Extendemos la interfaz Request de Express para añadir nuestra propiedad 'user'
-// Esto es para que TypeScript no se queje cuando hagamos 'req.user'
 declare global {
   namespace Express {
     export interface Request {
@@ -22,35 +19,32 @@ declare global {
 export const protect = (req: Request, res: Response, next: NextFunction) => {
   let token: string | undefined;
 
-  // 1. Revisar si el token viene en el header 'Authorization'
+  console.log("--- MIDDLEWARE PROTECT ---");
+  console.log("Header Auth recibido:", req.headers.authorization);
+
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
-      // 2. Extraer el token (ej: "Bearer eyJhbGci...")
       token = req.headers.authorization.split(' ')[1];
-
-      // 3. Verificar el token
+      
       const secret = process.env.JWT_SECRET;
-      if (!secret) {
-        throw new Error('JWT_SECRET no está definido');
-      }
+      if (!secret) throw new Error('Falta JWT_SECRET');
 
-      const decoded = jwt.verify(token, secret) as JwtPayload;
+      const decoded = jwt.verify(token, secret) as any;
       
-      // 4. Añadir el payload del usuario al objeto 'req'
-      // Así, todas las rutas protegidas sabrán "quién" hizo la petición
+      console.log("Token decodificado correctamente. Usuario ID:", decoded.id);
+      
       req.user = decoded;
-      
-      // 5. Dejar pasar la petición
       next();
+      return;
 
     } catch (error) {
-      // Si el token es inválido o expiró
-      return res.status(401).json({ message: 'No autorizado, token inválido' });
+      console.error("Error verificando token:", error);
+      return res.status(401).json({ message: 'Token inválido o expirado' });
     }
   }
 
-  // 6. Si no hay token en el header
   if (!token) {
+    console.log("No se encontró token en el header");
     return res.status(401).json({ message: 'No autorizado, no hay token' });
   }
 };
