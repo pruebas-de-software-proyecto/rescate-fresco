@@ -1,24 +1,54 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box,
-  Button,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Alert,
+  Box, Button, IconButton, Paper, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Alert, Typography, Chip, Stack, Avatar
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'; 
+import ReportProblemIcon from '@mui/icons-material/ReportProblem'; 
 import FullLotesAPI, { FullLote } from '../services/types';
 import LoteCreateDialog from './LoteCreateDialog';
 import LoteFormDialog from './LoteFormDialog';
-import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+
+// Helpers
+const formatCLP = (amount: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount); //  para formatear precio a CLP
+
+const formatDateShort = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(date);
+};
+
+const calculateDiscount = (original: number, rescate: number) => {
+  if (!original || original === 0) return 0;
+  return Math.round(((original - rescate) / original) * 100);
+};
+
+const isDateExpired = (dateString: string) => {
+    if (!dateString) return false;
+
+    const vencimiento = new Date(dateString);
+    const hoy = new Date();
+    const hoyMidnight = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+
+    const vencimientoMidnight = new Date(
+        vencimiento.getUTCFullYear(), 
+        vencimiento.getUTCMonth(), 
+        vencimiento.getUTCDate()
+    );
+    return vencimientoMidnight.getTime() < hoyMidnight.getTime();
+};
+
+const getStatusColor = (status: string) => {
+  switch (status?.toLowerCase()) {
+    case 'disponible': return { bg: '#E6F4EA', color: '#1E8E3E' }; 
+    case 'reservado': return { bg: '#FCE8E6', color: '#C5221F' }; 
+    case 'retirado': return { bg: '#F1F3F4', color: '#5F6368' }; 
+    case 'vencido': return { bg: '#FEF7E0', color: '#EA8600' }; 
+    default: return { bg: '#F1F3F4', color: '#000' };
+  }
+};
 
 const LoteTable: React.FC = () => {
   const [lotes, setLotes] = useState<FullLote[]>([]);
@@ -26,27 +56,32 @@ const LoteTable: React.FC = () => {
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [loading, setLoading] = useState(true);
-  const { logout } = useAuth(); 
+  
+  const { logout, user } = useAuth();
 
   const handleUnauthorized = (err: any) => {
     if (err.response && err.response.status === 401) {
       setError('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
       logout();
-      return true; // Devuelve 'true' si fue un error 401
+      return true;
     }
-    return false; // No fue un error 401
+    return false;
   };
 
   const fetchLotes = async () => {
-    const data = await FullLotesAPI.getAll();
-    setLotes(data);
+    try {
+      const data = await FullLotesAPI.getAllGestion();
+      
+      setLotes(data);
+
+    } catch (err: any) {
+        handleUnauthorized(err);
+    }
   };
 
   useEffect(() => {
-    fetchLotes();
-  }, []);
+    if (user) fetchLotes();
+  }, [user]);
 
   const handleCreate = () => {
     setSelectedLote(null);
@@ -56,145 +91,148 @@ const LoteTable: React.FC = () => {
   const handleEdit = (lote: FullLote) => {
     setError(null);
     setSelectedLote(lote);
-    setOpenEditDialog(true)
+    setOpenEditDialog(true);
   };
 
   const handleUpdate = async (id: string, updatedData: Partial<FullLote>) => {
     try {
-      // Validar precio de rescate
-      if (selectedLote && updatedData.precioRescate) {
-        const precioRescate = Number(updatedData.precioRescate);
-        const precioOriginal = selectedLote.precioOriginal;
-
-        if (precioRescate >= precioOriginal) {
-          setError('El precio de rescate debe ser menor al precio original');
-          return;
-        }
-      }
-
-      // Validar campos vacíos
-      const requiredFields = ['nombre', 'descripcion', 'precioRescate'];
-      for (const field of requiredFields) {
-        if (updatedData[field as keyof FullLote] === '') {
-          setError(`El campo ${field} no puede estar vacío`);
-          return;
-        }
-      }
-
-      if (updatedData.fechaVencimiento) {
-      const fechaVencimiento = new Date(updatedData.fechaVencimiento);
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0); // Reset hora a 00:00:00
-
-      if (fechaVencimiento < hoy) {
-        setError('La fecha de vencimiento debe ser posterior a hoy');
-        return;
-      }
-    }
-
-      // Si pasa las validaciones, actualizar
-      await FullLotesAPI.update(id, updatedData);
-      setError(null);
-      handleCloseForm();
-      await fetchLotes();
+       if (selectedLote && updatedData.precioRescate) {
+            const precioRescate = Number(updatedData.precioRescate);
+            const precioOriginal = selectedLote.precioOriginal;
+            if (precioRescate >= precioOriginal) {
+               setError('El precio de rescate debe ser menor al precio original');
+               return;
+            }
+       }
+       await FullLotesAPI.update(id, updatedData);
+       setError(null);
+       handleCloseForm();
+       await fetchLotes();
     } catch (err: any) {
-      setError('Error al actualizar el lote');
-      console.error('Error updating lote:', err);
+       setError('Error al actualizar el lote');
     }
   };
 
   const handleDelete = async (id: string) => {
     if (window.confirm('¿Seguro quieres eliminar este lote?')) {
       try {
-        await FullLotesAPI.delete(id); // <-- Esta llamada ahora puede fallar (401)
+        await FullLotesAPI.delete(id);
         fetchLotes();
-      } catch (err: any) { // <-- 3. Añadimos el catch
+      } catch (err: any) {
         if (!handleUnauthorized(err)) {
           setError('Error al eliminar el lote');
         }
-        console.error('Error deleting lote:', err);
       }
     }
   };
 
   const handleLoteCreated = () => {
-    // 1. Cierra el diálogo/formulario (si no lo haces ya en onClose)
-    handleCloseForm(); 
-    // 2. Lógica para recargar la lista de lotes
-    console.log("Lote creado, recargando datos...");
-    // Por ejemplo: refetchLotes(); 
-};
+    handleCloseForm();
+    fetchLotes();
+  };
 
   const handleCloseForm = () => {
     setOpenCreateDialog(false);
     setOpenEditDialog(false);
     setSelectedLote(null);
-    fetchLotes();
+    fetchLotes(); 
   };
-  
 
   return (
     <>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-      <Box sx={{ mb: 2, textAlign: 'left' }}>
-        <Button variant="contained" onClick={() => setOpenCreateDialog(true)}>
-          Crear Lote
+      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
+
+      <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 5, mt: 2 }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: '600', color: '#565656' }}>Gestión de Lotes</Typography>
+        <Button 
+            variant="contained" onClick={handleCreate}
+            sx={{ 
+                position: 'absolute', right: 0, backgroundColor: '#1E8E3E', 
+                textTransform: 'none', borderRadius: '6px', px: 2,
+                '&:hover': { backgroundColor: '#166E2F' }
+            }}
+        >
+          Crear Lote +
         </Button>
       </Box>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Nombre</TableCell>
-              <TableCell>Categoría</TableCell>
-              <TableCell>Cantidad</TableCell>
-              <TableCell>Unidad</TableCell>
-              <TableCell>Precio Rescate</TableCell>
-              <TableCell>Acciones</TableCell>
-            </TableRow>
-          </TableHead>
+
+      <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #E0E0E0' }}>
+        <Table sx={{ minWidth: 650 }}>
+          <TableHead></TableHead>
           <TableBody>
-            {lotes.map((lote) => (
-              <TableRow key={lote._id}>
-                <TableCell>{lote.nombre}</TableCell>
-                <TableCell>{lote.categoria}</TableCell>
-                <TableCell>{lote.cantidad}</TableCell>
-                <TableCell>{lote.unidad}</TableCell>
-                <TableCell>{lote.precioRescate}</TableCell>
-                <TableCell>
-                  <IconButton onClick={() => handleEdit(lote)} aria-label="edit">
-                    <EditIcon />
-                  </IconButton>
-                  {<IconButton onClick={() => handleDelete(lote._id)} aria-label="delete">
-                    <DeleteIcon />
-                  </IconButton> }
-                </TableCell>
-              </TableRow>
-            ))}
+            {lotes.map((lote) => {
+                const discount = calculateDiscount(lote.precioOriginal, lote.precioRescate);
+                const expired = isDateExpired(lote.fechaVencimiento.toString());
+                
+                // CORRECCIÓN 2: Tipado explícito como 'string' para evitar error de Enum
+                let effectiveState: string = lote.estado; 
+                
+                if (lote.estado === 'Disponible' && expired) {
+                    effectiveState = 'vencido';
+                }
+
+                let displayLabel: string = effectiveState;
+                if (effectiveState.toLowerCase() === 'vencido') {
+                    displayLabel = 'Caducado';
+                }
+
+                const statusStyle = getStatusColor(effectiveState);
+
+                return (
+                  <TableRow key={lote._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell component="th" scope="row">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar variant="rounded" src={lote.fotos?.[0] || ''} sx={{ width: 56, height: 56, bgcolor: '#f0f0f0' }}>
+                            {!lote.fotos?.[0] && lote.nombre.charAt(0)} 
+                        </Avatar>
+                        <Box>
+                            <Typography variant="subtitle1" fontWeight="bold">{lote.nombre}</Typography>
+                            <Typography variant="body2" color="#757575">{lote.categoria} • ID: {lote._id.slice(-4)}</Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                        <Box>
+                            <Typography variant="subtitle2" color="#9E9E9E" fontSize="0.75rem">Stock</Typography>
+                            <Typography variant="h6" fontWeight="bold">{lote.cantidad} {lote.unidad === 'unidades' ? 'un.' : lote.unidad}</Typography>
+                        </Box>
+                    </TableCell>
+                    <TableCell>
+                        <Stack direction="column" alignItems="flex-start" spacing={0.5}>
+                            <Chip label={displayLabel} size="small" sx={{ 
+                                backgroundColor: statusStyle.bg, color: statusStyle.color, 
+                                fontWeight: 'bold', borderRadius: '6px', textTransform: 'capitalize' 
+                            }} />
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: '#DA0303' }}>
+                                <ReportProblemIcon sx={{ fontSize: 16 }} />
+                                <Typography variant="caption" fontWeight="bold">Vence: {formatDateShort(lote.fechaVencimiento.toString())}</Typography>
+                            </Box>
+                        </Stack>
+                    </TableCell>
+                    <TableCell>
+                        <Box>
+                            <Typography variant="h6" fontWeight="bold">{formatCLP(lote.precioRescate)}</Typography>
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                <Typography variant="caption" sx={{ textDecoration: 'line-through', color: '#9E9E9E' }}>{formatCLP(lote.precioOriginal)}</Typography>
+                                <Typography variant="caption" color="#1E8E3E" fontWeight="bold">-{discount}%</Typography>
+                            </Box>
+                        </Box>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Button startIcon={<EditIcon />} onClick={() => handleEdit(lote)} sx={{ textTransform: 'none', color: '#1E8E3E', fontWeight: 'bold' }}>Editar</Button>
+                        <IconButton onClick={() => handleDelete(lote._id)} sx={{ color: '#D32F2F' }}><DeleteOutlineIcon /></IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                )})}
           </TableBody>
         </Table>
       </TableContainer>
-
-      <LoteCreateDialog
-          open={openCreateDialog}
-          onClose={handleCloseForm}
-          onSuccess={handleLoteCreated} // <-- ¡Propiedad obligatoria añadida!
-      />
-
+      <LoteCreateDialog open={openCreateDialog} onClose={handleCloseForm} onSuccess={handleLoteCreated} />
       {openEditDialog && selectedLote && (
-        <LoteFormDialog
-          open={openEditDialog}
-          onClose={handleCloseForm}
-          lote={selectedLote}
-          onSubmit={handleUpdate}
-          error={error}
-        />
+        <LoteFormDialog open={openEditDialog} onClose={handleCloseForm} lote={selectedLote} onSubmit={handleUpdate} error={error} />
       )}
-
     </>
   );
 };

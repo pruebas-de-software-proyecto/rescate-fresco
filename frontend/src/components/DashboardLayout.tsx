@@ -1,21 +1,21 @@
-// frontend/src/components/DashboardLayout.tsx
 import React from 'react';
-import { CssBaseline, Container, Box, Typography } from '@mui/material';
+import { CssBaseline, Container, Box } from '@mui/material';
+
 
 interface Props {
-  title: string;
+
   children: React.ReactNode;
 }
 
-const DashboardLayout: React.FC<Props> = ({ title, children }) => {
+const DashboardLayout: React.FC<Props> = ({ children }) => {
   return (
     <>
       <CssBaseline />
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <Box sx={{ backgroundColor: '#11904aff', color: 'white', p: 2 }}>
-          <Typography variant="h5">{title}</Typography>
-        </Box>
-        <Container sx={{ mt: 4, mb: 4, flexGrow: 1 }}>{children}</Container>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#fff' }}>
+        
+        <Container sx={{ mt: 4, mb: 4, flexGrow: 1, maxWidth: 'lg' }}>
+            {children}
+        </Container>
       </Box>
     </>
   );
