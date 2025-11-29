@@ -111,6 +111,15 @@ const LoteCreateDialog: React.FC<LoteCreateDialogProps> = ({ open, onClose, onSu
         return;
     }
 
+    const fechaInput = new Date(formData.fechaVencimiento + 'T00:00:00');
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Resetear horas para comparar solo fechas
+
+    if (fechaInput < hoy) {
+        setError('La fecha de vencimiento no puede ser anterior a la fecha actual.');
+        return;
+    }
+
     setLoading(true);
     
     try {
