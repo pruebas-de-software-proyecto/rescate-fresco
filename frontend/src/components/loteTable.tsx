@@ -96,6 +96,13 @@ const LoteTable: React.FC = () => {
 
   const handleUpdate = async (id: string, updatedData: Partial<FullLote>) => {
     try {
+      // Validación: solo validar si el usuario cambió la fecha a una anterior a hoy
+      if (updatedData.fechaVencimiento && selectedLote && updatedData.fechaVencimiento !== selectedLote.fechaVencimiento) {
+        if (isDateExpired(updatedData.fechaVencimiento.toString())) {
+          setError('La fecha de vencimiento no puede ser anterior a la fecha actual');
+          return;
+        }
+      }
        if (selectedLote && updatedData.precioRescate) {
             const precioRescate = Number(updatedData.precioRescate);
             const precioOriginal = selectedLote.precioOriginal;
@@ -221,7 +228,7 @@ const LoteTable: React.FC = () => {
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                         <Button startIcon={<EditIcon />} onClick={() => handleEdit(lote)} sx={{ textTransform: 'none', color: '#1E8E3E', fontWeight: 'bold' }}>Editar</Button>
-                        <IconButton onClick={() => handleDelete(lote._id)} sx={{ color: '#D32F2F' }}><DeleteOutlineIcon /></IconButton>
+                        <IconButton onClick={() => handleDelete(lote._id)} sx={{ color: '#D32F2F' }} aria-label='delete'><DeleteOutlineIcon /></IconButton>
                       </Box>
                     </TableCell>
                   </TableRow>
