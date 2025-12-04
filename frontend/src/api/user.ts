@@ -8,7 +8,7 @@ export interface TiendaPerfil {
 
 const tiendasAPI = {
   getMiTienda: async (): Promise<TiendaPerfil> => {
-    const response = await api.get('/tiendas/me');
+    const response = await api.get('/tienda/me');
     return response.data;
   }
 };
