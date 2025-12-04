@@ -27,7 +27,7 @@ export default function AppRouter() {
           <Route path="/pago/:id/:pin" element={<PinPage />} />
           {/* Rutas protegidas (con NavBar y autenticación) */}
           <Route
-            path="/lotes-gestion"
+            path="/gestion-lotes"
             element={<ProtectedRoute element={<LotesGestionPage />} />}
           />
           <Route

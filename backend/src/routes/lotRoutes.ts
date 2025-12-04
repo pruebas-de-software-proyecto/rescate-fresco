@@ -1,10 +1,13 @@
 import express from 'express';
-import { actualizarLote, createLote, deleteLote, generarCodigoRetiro, getLoteById, getLotes, pagarLote, reservarLote } from '../controllers/lotController';
+import { actualizarLote, createLote, deleteLote, generarCodigoRetiro, getLoteById, getLotes, pagarLote, reservarLote, getMisLotes } from '../controllers/lotController';
+import { protect } from '../middleware/auth.middleware';
 
 const router = express.Router();
 
 router.get('/', getLotes);
-router.post('/', createLote);
+router.post('/', protect, createLote);
+router.get('/mis-lotes', protect, getMisLotes);
+
 router.get('/:id', getLoteById);
 
 router.put('/:id', actualizarLote); // Actualizar lote

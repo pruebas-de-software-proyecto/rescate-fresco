@@ -14,19 +14,23 @@ export interface FullLote {
   ventanaRetiro: string;
   ubicacion: string;
   fotos: string[];
-  estado: 'Disponible' | 'Reservado' | 'Donado' | 'Vencido';
+  estado: 'Disponible' | 'Reservado' | 'Retirado' | 'Vencido';
   proveedor: string;
   observaciones?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-// 4. LA CLASE (que ya estaba bien y usa la 'api' importada)
 class FullLotesAPI {
+  
   async getAll(): Promise<FullLote[]> {
-    // Esta ruta '/lotes' probablemente debería ser '/lotes/gestion'
-    // Revisa tus rutas del backend, pero por ahora usa el token.
     const res = await api.get('/lotes'); 
+    return res.data;
+  }
+
+  async getAllGestion(): Promise<FullLote[]> {
+
+    const res = await api.get('/lotes/mis-lotes'); 
     return res.data;
   }
 

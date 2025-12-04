@@ -4,7 +4,7 @@ import LoteTable from '../components/loteTable';
 
 const LotesGestionPage: React.FC = () => {
   return (
-   <DashboardLayout title="Gestión de Lotes ">
+    <DashboardLayout>
       <LoteTable />
     </DashboardLayout>
   );
