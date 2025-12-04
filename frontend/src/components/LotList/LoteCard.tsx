@@ -35,6 +35,19 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
     navigate(`/pago/${lote._id}`);
   };
 
+
+  const formatDateShort = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('es-CL', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric',
+      timeZone: 'UTC'
+    }).format(date);
+  };
+  
+
   return (
     <Card
       sx={{
@@ -110,7 +123,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
 
           <Typography variant="body2" color="success.main" sx={{ mt: 1 }}>
             Fecha vencimiento:{" "}
-            {new Date(lote.fechaVencimiento).toLocaleDateString("es-CL")}
+            {formatDateShort(lote.fechaVencimiento.toString())}
           </Typography>
         </CardContent>
       </Box>
