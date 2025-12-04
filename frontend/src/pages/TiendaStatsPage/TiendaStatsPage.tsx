@@ -85,16 +85,16 @@ export const TiendaStatsPage: React.FC = () => {
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2, mb: 4 }}>
         <MetricaCard
           titulo="Ingresos"
-          valor={`$${(metricas.ingresos / 1000).toFixed(0)}K`}
+          valor={`$${metricas.ingresos >= 1000 ? (metricas.ingresos / 1000).toFixed(0) + 'K' : metricas.ingresos.toFixed(0)}`}
           icon={<AttachMoneyIcon sx={{ color: '#1E8E3E', fontSize: 24 }} />}
-          subtitulo={`+12% esta semana`}
-          trend={12}
+          subtitulo={`Total de lotes pagados`}
+          trend={0}
           bgColor="#F4FAF4"
         />
 
         <MetricaCard
           titulo="Kg Rescatados"
-          valor={metricas.kgRescatados}
+          valor={`${metricas.kgRescatados.toFixed(0)} kg`}
           icon={<BalanceIcon sx={{ color: '#1976D2', fontSize: 24 }} />}
           subtitulo={`De ${metricas.totalLotes} lotes`}
           bgColor="#F4FAF4"
