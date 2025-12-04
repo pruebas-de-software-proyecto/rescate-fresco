@@ -37,6 +37,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
 
   return (
     <Card
+      data-testid="lote-card" 
       sx={{
         width: 260,
         borderRadius: 3,
@@ -118,6 +119,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
       {/* ⚙️ Botones */}
       <Stack direction="row" spacing={1.5} sx={{ p: 2, pt: 1 }}>
         <Button
+          data-testid="btn-detalle"
           variant="outlined"
           fullWidth
           onClick={(e) => {

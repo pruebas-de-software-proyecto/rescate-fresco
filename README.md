@@ -33,6 +33,9 @@ Aplicación que permite a las tiendas publicar lotes de alimentos próximos a ve
 - Node.js (v24.0.0 o superior) - Requerido por las dependencias del backend
 - npm (v10 o superior)
 - MongoDB (v7.0 o superior)
+- selenium 4.16.0
+- webdriver-manager 4.0.1
+- unittest-xml-reporting==3.2.0
 
 > Nota: Se recomienda usar Node.js v24.x debido a las dependencias del backend (@types/node ^24.8.1)
 > 

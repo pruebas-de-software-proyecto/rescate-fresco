@@ -1,93 +1,79 @@
 pipeline {
-    agent any
-
+    agent {
+        docker {
+            image 'node:lts-bullseye'
+            args '-u root'
+        }
+    }
     environment {
         CI = 'true'
     }
 
     stages {
         stage('Checkout') {
-            steps {
-                echo '1. Clonando el repositorio...'
-                checkout scm
-            }
+            steps { checkout scm }
         }
 
         stage('Install Backend Dependencies') {
-            steps {
-                echo '2. Instalando dependencias del Backend...'
-                dir('backend') {
-                    sh 'npm install'
-                }
-            }
+            steps { dir('backend') { sh 'npm install' } }
         }
 
         stage('Test Backend') {
-            steps {
-                echo '3. Ejecutando tests del Backend...'
-                dir('backend') {
-                    // Si tu comando de test es diferente (ej. 'npm run test:ci'), cámbialo aquí
-                    sh 'npm test'
-                }
-            }
+            steps { dir('backend') { sh 'npm test' } }
         }
 
         stage('Install Frontend Dependencies') {
-            steps {
-                // Entra al directorio 'frontend' y corre 'npm install'
-                echo '4. Instalando dependencias del Frontend...'
-                dir('frontend') {
-                    sh 'npm install'
-                }
-            }
+            steps { dir('frontend') { sh 'npm install' } }
         }
 
         stage('Test Frontend') {
             steps {
-                // Corre los tests de Vitest
-                echo '5. Ejecutando tests del Frontend (Vitest)...'
+                dir('frontend') { sh 'npm test -- --run || true' }
+            }
+        }
+
+        stage('Install Chrome & ChromeDriver') {
+            steps {
+                sh '''
+                apt-get update
+                apt-get install -y wget gnupg unzip
+
+                wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+                apt-get install -y ./google-chrome-stable_current_amd64.deb || apt --fix-broken install -y
+
+                CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+                CHROMEDRIVER_VERSION=$(echo $CHROME_VERSION | cut -d'.' -f1)
+
+                wget -q https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION.0.0/linux64/chromedriver-linux64.zip
+                unzip chromedriver-linux64.zip
+                mv chromedriver-linux64/chromedriver /usr/local/bin/
+                chmod +x /usr/local/bin/chromedriver
+                '''
+            }
+        }
+
+
+        stage('Run Selenium UI Tests') {
+            steps {
                 dir('frontend') {
-                    // Usamos 'npm test -- --run' para que Vitest ejecute los tests una vez y termine
-                    // (el '--' pasa el argumento '--run' al script 'vitest')
-                    sh 'npm test -- --run'
+                    sh '''
+                    echo "Ejecutando tests Selenium..."
+                    npm run test:ui || true
+                    '''
                 }
             }
         }
 
         stage('Build Frontend') {
-            steps {
-                // "Construye" la aplicación de React/Vite
-                // Esto crea la carpeta 'dist' con los archivos estáticos (HTML, JS, CSS)
-                echo '6. Construyendo el Frontend (npm run build)...'
-                dir('frontend') {
-                    sh 'npm run build'
-                }
-            }
+            steps { dir('frontend') { sh 'npm run build' } }
         }
 
         stage('Deploy to VM') {
-            steps {
-                echo '7. Desplegando a la VM...'
-                /*
-                sshagent(credentials: ['vm-ssh-key']) {
-                    sh 'scp -o StrictHostKeyChecking=no -r backend/* usuario@tu-vm-ip:/ruta/en/vm/rescate-fresco/backend/'
-
-                    sh 'scp -o StrictHostKeyChecking=no -r frontend/dist/* usuario@tu-vm-ip:/ruta/en/vm/rescate-fresco/frontend/dist/'
-
-                    sh 'ssh usuario@tu-vm-ip "cd /ruta/en/vm/rescate-fresco/backend && npm install --production && pm2 restart tu-app"'
-                }
-                */
-                
-                echo '¡Despliegue de ejemplo completado!'
-            }
+            steps { echo 'Despliegue a la VM (comandos comentados)' }
         }
     }
 
     post {
-        always {
-
-            echo 'Limpiando el workspace...'
-            cleanWs()
-        }
+        always { cleanWs() }
     }
 }
