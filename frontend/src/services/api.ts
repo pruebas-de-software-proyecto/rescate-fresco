@@ -69,6 +69,29 @@ export interface Stats {
   }>;
 }
 
+export interface Metricas {
+  ingresos: number;
+  kgRescatados: number;
+  tasaRetiro: number;
+  mermaEvitada: number;
+  evolucionSemanal: Array<{
+    dia: string;
+    ingresos: number;
+    kg: number;
+  }>;
+  categoriasTop: Array<{
+    categoria: string;
+    cantidad: number;
+  }>;
+  estadoLotes: {
+    vendidos: number;
+    vencidos: number;
+    cancelados: number;
+  };
+  tiempoPromedio: number;
+  totalLotes: number;
+}
+
 class LotesAPI {
   async getAll(params?: {
     search?: string;
@@ -135,3 +158,12 @@ class LotesAPI {
 }
 
 export default new LotesAPI();
+
+class TiendaAPI {
+  async getMetricas(): Promise<Metricas> {
+    const response = await api.get('/tienda/metricas');
+    return response.data;
+  }
+}
+
+export const tiendaAPI = new TiendaAPI();
