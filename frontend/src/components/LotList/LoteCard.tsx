@@ -25,7 +25,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
     "default" | "success" | "warning" | "error" | "info"
   > = {
     Disponible: "success",
-    reservado: "warning",
+    Reservado: "warning",
     pagado: "info",
     retirado: "default",
     vencido: "error",
@@ -79,7 +79,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
           backgroundColor:
             lote.estado === "Disponible"
               ? "#4caf50"
-              : lote.estado === "reservado"
+              : lote.estado === "Reservado"
               ? "#ffb300"
               : lote.estado === "pagado"
               ? "#0288d1"
@@ -147,7 +147,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
           disabled={lote.estado !== "Disponible"}
           onClick={handleReserve}
         >
-          {lote.estado === "reservado" ? "Reservado" : "Reservar"}
+          {lote.estado === "Reservado" ? "Reservado" : "Reservar"}
         </Button>
       </Stack>
     </Card>

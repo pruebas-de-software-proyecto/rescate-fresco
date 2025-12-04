@@ -13,7 +13,7 @@ export const getLotes = async (req: Request, res: Response) => {
       const targetDate = new Date(vencimientoAntesDe as string);
       filters.fechaVencimiento = { $gte: targetDate };
     }
-    filters.estado = { $in: ['Disponible', 'reservado'] };
+    filters.estado = { $in: ['Disponible', 'Reservado'] };
     const lotes = await Lot.find(filters);
     res.json(lotes);
   } catch (error) {
@@ -75,7 +75,7 @@ export const getLoteById = async (req: Request, res: Response) => {
   try {
     const lote = await Lot.findById(req.params.id);
     if (!lote) return res.status(404).json({ message: 'Lote no encontrado' });
-    if (lote.estado === 'reservado' && lote.holdExpiresAt && lote.holdExpiresAt < new Date()) {
+    if (lote.estado === 'Reservado' && lote.holdExpiresAt && lote.holdExpiresAt < new Date()) {
       lote.estado = 'Disponible';
       lote.holdExpiresAt = null;
       await lote.save();
@@ -115,7 +115,7 @@ export const reservarLote = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "El lote no está disponible" });
 
     const holdDuration = 15 * 60 * 1000; 
-    lote.estado = "reservado";
+    lote.estado = "Reservado";
     lote.holdExpiresAt = new Date(Date.now() + holdDuration);
     await lote.save();
     res.json({
@@ -133,7 +133,7 @@ export const pagarLote = async (req: Request, res: Response) => {
     const { loteId } = req.body;
     const lote = await Lot.findById(loteId);
     if (!lote) return res.status(404).json({ error: "Lote no encontrado" });
-    if (lote.estado !== "reservado")
+    if (lote.estado !== "Reservado")
       return res.status(400).json({ error: "El lote no está reservado" });
     if (lote.holdExpiresAt && lote.holdExpiresAt < new Date()) {
       lote.estado = "Disponible";
