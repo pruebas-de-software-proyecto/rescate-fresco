@@ -658,6 +658,6 @@ describe('ReservationsPage', () => {
     const codigoButtons = screen.getAllByText('Ver código de retiro');
     await user.click(codigoButtons[0]);
     
-    expect(mockNavigate).toHaveBeenCalledWith('/pago/reserved-1/undefined');
+    expect(mockNavigate).toHaveBeenCalledWith('/pago/reserved-1/ABC123');
   });
 });

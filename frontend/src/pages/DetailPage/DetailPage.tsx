@@ -29,6 +29,13 @@ export default function DetailPage() {
     const [error, setError] = useState<string | null>(null);
     const [imgIndex, setImgIndex] = useState(0);
 
+
+    const formatDateShort = (dateString: string) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long', year: 'numeric' ,timeZone: 'UTC' }).format(date);
+    };
+
     const { logout } = useAuth();
 
     useEffect(() => {
@@ -204,7 +211,7 @@ export default function DetailPage() {
                                 <strong>Cantidad:</strong> {product.cantidad} {product.unidad}
                             </Typography>
                             <Typography color="textSecondary">
-                                <strong>Vencimiento:</strong> {formatDate(product.fechaVencimiento)}
+                                <strong>Vencimiento:</strong> {formatDateShort(product.fechaVencimiento.toString())}
                             </Typography>
                         </div>
 

@@ -7,6 +7,7 @@ import LotesPage from '../pages/LotesPage';
 import PagoPage from '../pages/PagoPage';
 import { PinPage } from '../pages/PinPage';
 import RegisterPage from '../pages/RegisterPage/RegisterPage';
+import { ReservationPageAdmin } from '../pages/ReservationPageAdmin';
 import { ReservationsPage } from '../pages/ReservationsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -33,6 +34,10 @@ export default function AppRouter() {
           <Route
             path="/reservation"
             element={<ProtectedRoute element={<ReservationsPage />} />}
+          />
+          <Route
+            path="/reservations-admin"
+            element={<ProtectedRoute element={<ReservationPageAdmin />} />}
           />
         </Route>
       </Routes>

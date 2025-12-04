@@ -115,7 +115,7 @@ describe('DetailPage', () => {
     );
 
     expect(await screen.findByText('Manzanas de Prueba')).toBeInTheDocument();
-    expect(screen.getByText('30 de diciembre, 2025')).toBeInTheDocument();
+    expect(screen.getByText('31 de diciembre de 2025')).toBeInTheDocument();
   });
 
   // TEST 4: Datos completos mostrados
@@ -143,7 +143,7 @@ describe('DetailPage', () => {
       return element?.textContent === 'Cantidad: 10 kg';
     })).toBeInTheDocument();
     
-    expect(screen.getByText('30 de diciembre, 2025')).toBeInTheDocument(); // Vencimiento
+    expect(screen.getByText('31 de diciembre de 2025')).toBeInTheDocument(); // Vencimiento
     expect(screen.getByText('Frescas y jugosas.')).toBeInTheDocument(); // Descripción
   });
 });
