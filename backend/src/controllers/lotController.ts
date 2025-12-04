@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Error as MongooseError } from 'mongoose';
 import Lot from '../models/lotModels';
+import { User } from '../models/user.model';
 
 export const getLotes = async (req: Request, res: Response) => {
   try {
@@ -23,25 +24,46 @@ export const getLotes = async (req: Request, res: Response) => {
 
 export const createLote = async (req: Request, res: Response) => {
   try {
-    const loteData = req.body;
+    // 1. Verificar autenticación
+    const userId = (req as any).user?.id;
+    if (!userId) return res.status(401).json({ message: "No autorizado" });
+
+    // 2. Obtener datos del usuario real
+    const usuario = await User.findById(userId);
+    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    const nombreProveedor = (usuario as any).nombreTienda || usuario.nombre;
+
+    // 3. Preparar el objeto final (Evitamos mutar req.body directamente)
+    // Creamos una copia limpia de los datos recibidos
+    const datosFinales = {
+        ...req.body,
+        proveedor: nombreProveedor // Sobrescribimos el proveedor aquí
+    };
+
+    // 4. Manejo de imagen (si existe)
     const imagenSubida = req.file;
     if (imagenSubida) {
       const fotoUrl = (imagenSubida as any).location || imagenSubida.path;
-      loteData.fotos = [fotoUrl];
+      datosFinales.fotos = [fotoUrl];
     }
-    const nuevoLote = new Lot(loteData);
+    
+    // 5. Crear y Guardar
+    const nuevoLote = new Lot(datosFinales);
     const loteGuardado = await nuevoLote.save();
+    
     res.status(201).json({
       success: true,
       data: loteGuardado,
       message: 'Lote creado exitosamente',
     });
+
   } catch (error) {
     console.error("Error al crear el lote:", error);
     if (error instanceof MongooseError.ValidationError) {
       return res.status(400).json({
         success: false,
-        message: "Fallo la validación de datos. Verifique que todos los campos requeridos han sido enviados.",
+        message: "Error de validación",
         errors: (error as any).errors,
       });
     }
@@ -158,5 +180,36 @@ export const generarCodigoRetiro = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error al generar PIN:", error);
     res.status(500).json({ error: "Error interno al generar el código" });
+  }
+};
+
+export const getMisLotes = async (req: Request, res: Response) => {
+  try {
+    // 1. Obtenemos ID del usuario (igual que en tiendaController)
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+       return res.status(401).json({ message: 'No autenticado' });
+    }
+
+    // 2. Buscamos el usuario para obtener su nombreTienda real
+    const usuario = await User.findById(userId);
+    
+    if (!usuario) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // 3. Usamos nombreTienda (o nombre como fallback)
+    const nombreProveedor = (usuario as any).nombreTienda || usuario.nombre;
+
+    // 4. Buscamos los lotes de ese proveedor (SIN FILTRAR POR ESTADO)
+    // Así verás los "Vencidos", "Reservados", etc.
+    const lotes = await Lot.find({ proveedor: nombreProveedor }).sort({ createdAt: -1 });
+    
+    res.json(lotes);
+
+  } catch (error) {
+    console.error("Error al obtener mis lotes:", error);
+    res.status(500).json({ error: 'Error del servidor' });
   }
 };
