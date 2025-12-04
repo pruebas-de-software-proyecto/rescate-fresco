@@ -108,7 +108,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/lotes', lotRoutes);
 app.use("/api/reservas", reservaRoutes); 
 app.use('/api/payments', paymentRoutes);
-app.use('/api/tiendas', tiendaRoutes); // <--- ¡AQUÍ ESTÁ LA CORRECCIÓN! (Antes del 404)
+app.use('/api/tienda', tiendaRoutes);
 
 // 7. Manejo de errores (Catch-All)
 // Si ninguna ruta anterior coincidió, cae aquí (404)

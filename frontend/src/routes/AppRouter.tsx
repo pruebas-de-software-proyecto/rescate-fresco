@@ -9,6 +9,7 @@ import { PinPage } from '../pages/PinPage';
 import RegisterPage from '../pages/RegisterPage/RegisterPage';
 import { ReservationPageAdmin } from '../pages/ReservationPageAdmin';
 import { ReservationsPage } from '../pages/ReservationsPage';
+import { TiendaStatsPage } from '../pages/TiendaStatsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export default function AppRouter() {
@@ -38,6 +39,10 @@ export default function AppRouter() {
           <Route
             path="/reservations-admin"
             element={<ProtectedRoute element={<ReservationPageAdmin />} />}
+          />
+          <Route
+            path="/tienda/metricas"
+            element={<ProtectedRoute element={<TiendaStatsPage />} />}
           />
         </Route>
       </Routes>
