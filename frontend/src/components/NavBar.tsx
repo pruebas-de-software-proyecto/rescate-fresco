@@ -104,7 +104,14 @@ export default function NavBar() {
                     sx={{ color: "white", cursor: "pointer", "&:hover": { opacity: 0.8 } }}
                     onClick={() => navigate('/reservations-admin')} // <-- Funcional
                   >
-                    Reservaciones
+                    Reservas
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "white", cursor: "pointer", "&:hover": { opacity: 0.8 } }}
+                    onClick={() => navigate('/tienda/metricas')} // <-- Funcional
+                  >
+                    Mis Métricas
                   </Typography>
                 </>
               ) : (
