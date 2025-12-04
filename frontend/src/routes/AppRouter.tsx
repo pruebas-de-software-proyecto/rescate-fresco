@@ -5,6 +5,7 @@ import LoginPage from '../pages/LoginPage/LoginPage';
 import LotesGestionPage from '../pages/LotesGestionPage';
 import LotesPage from '../pages/LotesPage';
 import PagoPage from '../pages/PagoPage';
+import { PinPage } from '../pages/PinPage';
 import RegisterPage from '../pages/RegisterPage/RegisterPage';
 import { ReservationsPage } from '../pages/ReservationsPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -23,6 +24,7 @@ export default function AppRouter() {
           <Route path="/" element={<LotesPage />} />
           <Route path="/lotes/:id" element={<DetailPage />} />
           <Route path="/pago/:id" element={<PagoPage />} />
+          <Route path="/pago/:id/:pin" element={<PinPage />} />
           {/* Rutas protegidas (con NavBar y autenticación) */}
           <Route
             path="/lotes-gestion"
