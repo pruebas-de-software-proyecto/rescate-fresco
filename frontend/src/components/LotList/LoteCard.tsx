@@ -28,7 +28,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
     "default" | "success" | "warning" | "error" | "info"
   > = {
     Disponible: "success",
-    reservado: "warning",
+    Reservado: "warning",
     pagado: "info",
     retirado: "default",
     vencido: "error",
