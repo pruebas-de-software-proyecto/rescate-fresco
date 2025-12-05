@@ -73,7 +73,7 @@ const mockMetricas: api.Metricas = {
   estadoLotes: {
     vendidos: 3,
     vencidos: 1,
-    cancelados: 0,
+    disponibles: 0,
   },
 };
 
@@ -163,7 +163,7 @@ describe('TiendaStatsPage - RF-06: Panel de Métricas de la Tienda', () => {
       expect(screen.getByText('Estado de Lotes')).toBeInTheDocument();
       expect(screen.getByText('Vendidos')).toBeInTheDocument();
       expect(screen.getByText('Vencidos')).toBeInTheDocument();
-      expect(screen.getByText('Cancelados')).toBeInTheDocument();
+      expect(screen.getByText('Disponibles')).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 

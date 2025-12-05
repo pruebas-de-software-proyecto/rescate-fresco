@@ -3,14 +3,14 @@ import { Box, Paper, Typography, Stack, LinearProgress } from '@mui/material';
 interface EstadoLotesProps {
   vendidos: number;
   vencidos: number;
-  cancelados: number;
+  disponibles: number;
 }
 
-export const EstadoLotes: React.FC<EstadoLotesProps> = ({ vendidos, vencidos, cancelados }) => {
-  const total = vendidos + vencidos + cancelados;
+export const EstadoLotes: React.FC<EstadoLotesProps> = ({ vendidos, vencidos, disponibles }) => {
+  const total = vendidos + vencidos + disponibles;
   const porcentajeVendidos = total > 0 ? (vendidos / total) * 100 : 0;
   const porcentajeVencidos = total > 0 ? (vencidos / total) * 100 : 0;
-  const porcentajeCancelados = total > 0 ? (cancelados / total) * 100 : 0;
+  const porcentajeCancelados = total > 0 ? (disponibles / total) * 100 : 0;
 
   return (
     <Paper sx={{ p: 3, borderRadius: '12px', border: '1px solid #E0E0E0' }} elevation={0}>
@@ -79,7 +79,7 @@ export const EstadoLotes: React.FC<EstadoLotesProps> = ({ vendidos, vencidos, ca
         <Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2" color="#666">
-              Cancelados
+              Disponibles
             </Typography>
             <Typography variant="body2" fontWeight="bold" color="#D32F2F">
               {porcentajeCancelados.toFixed(0)}%
@@ -99,7 +99,7 @@ export const EstadoLotes: React.FC<EstadoLotesProps> = ({ vendidos, vencidos, ca
             }}
           />
           <Typography variant="caption" color="#999" sx={{ mt: 0.5, display: 'block' }}>
-            {cancelados} lotes
+            {disponibles} lotes
           </Typography>
         </Box>
       </Stack>

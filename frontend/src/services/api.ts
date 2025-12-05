@@ -86,7 +86,7 @@ export interface Metricas {
   estadoLotes: {
     vendidos: number;
     vencidos: number;
-    cancelados: number;
+    disponibles: number;
   };
   tiempoPromedio: number;
   totalLotes: number;
