@@ -54,7 +54,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
   return (
     <Card
       sx={{
-        width: 260,
+        width: 320,
         borderRadius: 3,
         boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
         cursor: "pointer",
@@ -146,6 +146,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
 
         {user?.role === 'CONSUMIDOR' && (
           <Button
+            sx={{ width: '100%' }}
             variant="contained"
             color="primary"
             disabled={lote.estado !== "Disponible"}
