@@ -1,5 +1,5 @@
-import { Builder, By, until, WebDriver } from "selenium-webdriver";
 import "chromedriver";
+import { Builder, By, until, WebDriver } from "selenium-webdriver";
 
 describe("LotList UI Tests (Selenium)", function () {
   this.timeout(60000);
@@ -10,9 +10,9 @@ describe("LotList UI Tests (Selenium)", function () {
     driver = await new Builder().forBrowser("chrome").build();
   });
 
-  after(async () => {
-    await driver.quit();
-  });
+  // after(async () => {
+  //   await driver.quit();
+  // });
 
   it("should show loading spinner on load", async () => {
     await driver.get("http://localhost:3000/");
