@@ -16,7 +16,7 @@ Aplicación que permite a las tiendas publicar lotes de alimentos próximos a ve
 - Node.js
 - Express ^5.1.0
 - TypeScript ^5.9.3
-- MongoDB (base de datos en local)
+- MongoDB (base de datos en la nube)
 - Mongoose ^8.19.1
 
 ### Frontend
@@ -45,21 +45,9 @@ cd rescate-fresco
 
 ```
 
-### Paso 2: Base de Datos
+### Paso 2: Backend
 
 1. Abrir una terminal
-2. Iniciar el servidor MongoDB:
-
-```bash
-mongod --dbpath <ruta-de-tu-base-de-datos>
-
-```
-
-1. Mantener esta terminal abierta
-
-### Paso 3: Backend
-
-1. Abrir una nueva terminal
 2. Navegar al directorio backend:
 
 ```bash
@@ -67,36 +55,40 @@ cd backend
 
 ```
 
-1. Instalar dependencias:
+3. Instalar dependencias:
 
 ```bash
 npm install
 
 ```
 
-1. Crear archivo .env con el siguiente contenido:
+4. Crear archivo .env con el siguiente contenido:
 
 ```
+# Configuración del Servidor
 PORT=5001
-MONGODB_URI=mongodb://127.0.0.1:27017/rescatefresco
+NODE_ENV=development
+
+# Base de Datos (Reemplaza con tu string de conexión real)
+MONGODB_URI=mongodb+srv://<USUARIO>:<PASSWORD>@<TU_CLUSTER>.mongodb.net/?appName=<TU_APP>
+
+# Seguridad (Inventa una frase larga y segura)
+JWT_SECRET=cambia_esto_por_una_frase_larga_y_secreta
+
+# Pasarela de Pagos (Stripe) - Usa tus claves de prueba o producción
+STRIPE_SECRET_KEY=sk_test_tu_clave_secreta_aqui
+STRIPE_WEBHOOK_SECRET=whsec_tu_secreto_webhook_aqui
 
 ```
 
-1. Iniciar el servidor:
+5. Iniciar el servidor:
 
 ```bash
 npm run dev
 
 ```
 
-1. (Opcional) Poblar la base de datos con datos de prueba:
-
-```bash
-npm run seed
-
-```
-
-### Paso 4: Frontend
+### Paso 3: Frontend
 
 1. Abrir una nueva terminal
 2. Navegar al directorio frontend:
@@ -106,14 +98,18 @@ cd frontend
 
 ```
 
-1. Instalar dependencias:
+3. Instalar dependencias:
 
 ```bash
 npm install
 
 ```
+5. Crear archivo .env con el siguiente contenido:
+```
+VITE_API_URL=http://localhost:5001/api
+```
 
-1. Iniciar el servidor de desarrollo:
+6. Iniciar el servidor de desarrollo:
 
 ```bash
 npm run dev
@@ -127,13 +123,13 @@ npm run dev
 - `npm run dev`: Inicia el servidor en modo desarrollo con nodemon
 - `npm run build`: Compila el proyecto TypeScript
 - `npm start`: Inicia el servidor en modo producción
-- `npm run seed`: Pobla la base de datos con datos de prueba
 
 ### Consola Frontend
 
 - `npm run dev`: Inicia el servidor de desarrollo
 - `npm run build`: Compila el proyecto para producción
 - `npm test`: Ejecuta las pruebas con Vitest
+- `npm test <TuTest>`: Ejecuta las pruebas de archivo <TuTest>.
 - `npm run test:ui`: Ejecuta las pruebas con interfaz visual
 
 ## Equipo 👥
