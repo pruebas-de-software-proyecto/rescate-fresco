@@ -2,8 +2,6 @@
 
 /* 2. Reseteo global y aplicación de la fuente */
 html, body {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box; /* Buena práctica para el layout */
   
   /* 3. Aplicar Inter a toda la app */
@@ -11,14 +9,17 @@ html, body {
   
   /* Asegura que el contenedor raíz también ocupe todo */
   height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  padding: 0;
   width: 100%;
 }
 
 #root {
-  margin: 0 auto;
   height: 100%;
-  width: 100%;
+  margin: 0 auto;
   text-align: center;
+  width: 100%;
 }
 
 
