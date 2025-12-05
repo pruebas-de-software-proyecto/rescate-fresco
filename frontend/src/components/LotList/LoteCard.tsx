@@ -11,6 +11,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Lote } from "../../api/lotes";
 
+import { useAuth } from '../../context/AuthContext';
+
 interface Props {
   lote: Lote;
   onView: () => void;
@@ -19,6 +21,7 @@ interface Props {
 
 export function LoteCard({ lote, onView, onReserve }: Props) {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const estadoColors: Record<
     string,
@@ -79,7 +82,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
           backgroundColor:
             lote.estado === "Disponible"
               ? "#4caf50"
-              : lote.estado === "reservado"
+              : lote.estado === "Reservado"
               ? "#ffb300"
               : lote.estado === "pagado"
               ? "#0288d1"
@@ -141,14 +144,16 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
           Ver detalle
         </Button>
 
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={lote.estado !== "Disponible"}
-          onClick={handleReserve}
-        >
-          {lote.estado === "reservado" ? "Reservado" : "Reservar"}
-        </Button>
+        {user?.role === 'CONSUMIDOR' && (
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={lote.estado !== "Disponible"}
+            onClick={handleReserve}
+          >
+            {lote.estado === "Reservado" ? "Reservado" : "Reservar"}
+          </Button>
+        )}
       </Stack>
     </Card>
   );

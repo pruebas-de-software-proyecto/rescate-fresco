@@ -99,14 +99,16 @@ export default function LotList() {
             gap: 3,
           }}
         >
-          {lotes.map((lote) => (
-            <LoteCard
-              key={lote._id}
-              lote={lote}
-              onView={() => navigate(`/lotes/${lote._id}`)}
-              onReserve={() => handleReserve(lote)} 
-            />
-          ))}
+          <div>
+            {lotes.map((lote) => (
+              <LoteCard
+                key={lote._id}
+                lote={lote}
+                onView={() => navigate(`/lotes/${lote._id}`)}
+                onReserve={() => handleReserve(lote)} 
+              />
+            ))}
+          </div>
         </Box>
       </Box>
     </Box>
