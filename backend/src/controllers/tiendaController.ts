@@ -55,11 +55,11 @@ export const getMetricas = async (req: Request, res: Response) => {
 
     // Calcular métricas
     const ingresos = lotes
-      .filter(l => l.estado === 'pagado' || l.estado === 'retirado')
-      .reduce((sum, l) => sum + (l.precioRescate * l.cantidad), 0);
+      .filter(l => l.estado === 'Reservado' || l.estado === 'retirado')
+      .reduce((sum, l) => sum + (l.precioRescate), 0);
 
     const kgRescatados = lotes
-      .filter(l => l.estado === 'pagado' || l.estado === 'retirado')
+      .filter(l => l.estado === 'Reservado' || l.estado === 'retirado')
       .reduce((sum, l) => {
         if (l.unidad === 'kg') return sum + l.cantidad;
         // Conversiones aproximadas
@@ -74,7 +74,7 @@ export const getMetricas = async (req: Request, res: Response) => {
       : 0;
 
     const mermaEvitada = lotes
-      .filter(l => l.estado === 'pagado' || l.estado === 'retirado')
+      .filter(l => l.estado === 'Reservado' || l.estado === 'retirado')
       .reduce((sum, l) => sum + (l.precioOriginal - l.precioRescate), 0);
 
     // Evolución semanal (últimos 7 días)
@@ -92,7 +92,7 @@ export const getMetricas = async (req: Request, res: Response) => {
       });
 
       const ingresoDia = lotesDelDia
-        .filter(l => l.estado === 'pagado' || l.estado === 'retirado')
+        .filter(l => l.estado === 'Reservado' || l.estado === 'retirado')
         .reduce((sum, l) => sum + (l.precioRescate * l.cantidad), 0);
 
       const kgDia = lotesDelDia
@@ -119,13 +119,13 @@ export const getMetricas = async (req: Request, res: Response) => {
 
     // Estado de lotes
     const estadoLotes = {
-      vendidos: lotes.filter(l => l.estado === 'retirado').length,
+      vendidos: lotes.filter(l => l.estado === 'Reservado').length,
       vencidos: lotes.filter(l => l.estado === 'vencido').length,
-      cancelados: lotes.filter(l => l.estado === 'Reservado').length
+      disponibles: lotes.filter(l => l.estado === 'Disponible').length
     };
 
     // Tiempo promedio de venta
-    const lotesVendidos = lotes.filter(l => l.estado === 'retirado' || l.estado === 'pagado');
+    const lotesVendidos = lotes.filter(l => l.estado === 'Reservado' || l.estado === 'retirado');
     const tiempoPromedio = lotesVendidos.length > 0
       ? Math.round(
           lotesVendidos.reduce((sum, l) => {
