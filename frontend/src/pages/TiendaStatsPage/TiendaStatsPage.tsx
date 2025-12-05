@@ -155,7 +155,7 @@ export const TiendaStatsPage: React.FC = () => {
         <EstadoLotes
           vendidos={metricas.estadoLotes.vendidos}
           vencidos={metricas.estadoLotes.vencidos}
-          cancelados={metricas.estadoLotes.cancelados}
+          disponibles={metricas.estadoLotes.disponibles}
         />
       </Box>
     </Container>
