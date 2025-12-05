@@ -65,7 +65,7 @@ export default function LotList() {
   if (loading)
     return (
       <Box sx={{ textAlign: "center", mt: 5 }}>
-        <CircularProgress />
+        <CircularProgress data-testid="loading-spinner" />
         <Typography sx={{ mt: 2 }}>Cargando lotes...</Typography>
       </Box>
     );

@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "test": "mocha -r ts-node/register tests/**/*.ts"
+  },
   "engines": {
     "node": ">=20.0.0"
   },
@@ -15,6 +18,15 @@
     "stripe": "^19.3.0"
   },
   "devDependencies": {
-    "@types/react-router-dom": "^5.3.3"
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/selenium-webdriver": "^4.35.4",
+    "chai": "^6.2.1",
+    "chromedriver": "^142.0.3",
+    "mocha": "^11.7.5",
+    "selenium-webdriver": "^4.38.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

@@ -200,6 +200,7 @@ export default function RegisterPage() {
               />
             </div>
             <Button
+              id="btn-register"
               type="submit"
               variant="contained"
               className={styles.submitButton}

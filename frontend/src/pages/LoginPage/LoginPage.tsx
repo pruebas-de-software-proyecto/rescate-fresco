@@ -141,6 +141,7 @@ export default function LoginPage() {
             </div> */}
 
             <Button
+              id="btn-login"
               type="submit"
               variant="contained"
               className={styles.submitButton}
