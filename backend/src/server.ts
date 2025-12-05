@@ -60,7 +60,7 @@ app.post(
       const lotId = pi.metadata.lotId;
 
       try {
-        await Lot.findByIdAndUpdate(lotId, { estado: "reservado" });
+        await Lot.findByIdAndUpdate(lotId, { estado: "Reservado" });
         console.log("✅ Lote marcado como reservado:", lotId);
       } catch (err) {
         console.error("Error actualizando lote:", err);

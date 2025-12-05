@@ -5,23 +5,23 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardMedia,
-  CircularProgress,
-  Container,
-  // Componentes del Modal
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  TextField,
-  Typography
+    Alert,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    CardMedia,
+    CircularProgress,
+    Container,
+    // Componentes del Modal
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    Grid,
+    TextField,
+    Typography
 } from '@mui/material';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -30,12 +30,25 @@ import { useNavigate } from 'react-router-dom';
 import FullLotesAPI from '../../services/types';
 
 // Importamos las APIs
-import { fetchLotes, Lote, LoteFilters } from '../../api/lotes'; // Tu instancia por defecto
 import tiendasAPI from '../../api/user'; // Tu API de tiendas
 import styles from './ReservationPage.module.css';
 
+interface Product {
+    _id: string;
+    nombre: string;
+    estado: string;
+    precioRescate: number;
+    ventanaRetiro: string;
+    ubicacion: string;
+    proveedor: string;
+    fechaVencimiento: string;
+    codigoRetiro?: string;
+    fotos?: string[];
+}
+
+
 export default function AdminReservationsPage() {
-    const [reservedProducts, setReservedProducts] = useState<Lote[]>([]);
+    const [reservedProducts, setReservedProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [cancellingId, setCancellingId] = useState<string | null>(null);
@@ -44,7 +57,7 @@ export default function AdminReservationsPage() {
 
     // 2. ESTADOS PARA EL MODAL
     const [openModal, setOpenModal] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState<Lote | null>(null);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [inputCode, setInputCode] = useState('');
     const [validationStatus, setValidationStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
@@ -53,7 +66,7 @@ export default function AdminReservationsPage() {
     }, []);
 
     // 3. FUNCIONES DEL MODAL
-    const handleOpenValidation = (product: Lote) => {
+    const handleOpenValidation = (product: Product) => {
         setSelectedProduct(product);
         setInputCode('');
         setValidationStatus('idle');
@@ -96,15 +109,19 @@ export default function AdminReservationsPage() {
                 return;
             }
 
-            const filters: LoteFilters = { estado: 'reservado' };
-            const allReservedProducts = await fetchLotes(filters);
+            const allProducts = await FullLotesAPI.getAll();
+            console.log("🔍 Todos los productos:", allProducts);
+
+            const reservedProducts = allProducts.filter(
+                (product) => product.estado === 'Reservado'
+            );
             
-            console.log("📦 Total reservados en el sistema:", allReservedProducts);
+            console.log("📦 Total reservados en el sistema:", reservedProducts);
 
-            const listaProductos = Array.isArray(allReservedProducts) ? allReservedProducts : (allReservedProducts || []);
+            const listaProductos = Array.isArray(reservedProducts) ? reservedProducts : (reservedProducts || []);
 
-            const misProductos = listaProductos.filter((lote: Lote) => {
-                const tiendaLote = (lote.tienda || lote.proveedor || "").trim().toLowerCase();
+            const misProductos = listaProductos.filter((lote: Product) => {
+                const tiendaLote = (lote.proveedor || "").trim().toLowerCase();
                 const miTienda = (perfilTienda.nombreTienda || "").trim().toLowerCase();
                 
                 return tiendaLote === miTienda;

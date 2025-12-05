@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { User } from '../models/user.model';
 import Lot from '../models/lotModels';
+import { User } from '../models/user.model';
 
 export const getMiTienda = async (req: Request, res: Response) => {
   try {
@@ -121,7 +121,7 @@ export const getMetricas = async (req: Request, res: Response) => {
     const estadoLotes = {
       vendidos: lotes.filter(l => l.estado === 'retirado').length,
       vencidos: lotes.filter(l => l.estado === 'vencido').length,
-      cancelados: lotes.filter(l => l.estado === 'reservado').length
+      cancelados: lotes.filter(l => l.estado === 'Reservado').length
     };
 
     // Tiempo promedio de venta

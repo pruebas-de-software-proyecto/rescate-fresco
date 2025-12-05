@@ -13,7 +13,7 @@ export interface ILot extends Document {
   proveedor: string;
   ubicacion: string;
   fotos: string[];
-  estado: 'Disponible' | 'reservado' | 'pagado' | 'retirado' | 'vencido';
+  estado: 'Disponible' | 'Reservado' | 'pagado' | 'retirado' | 'vencido';
   holdExpiresAt?: Date | null;
   retiroLimite?: Date | null;
   createdAt?: Date;
@@ -45,7 +45,7 @@ const lotSchema = new Schema<ILot>(
     fotos: { type: [String], default: [] },
     estado: {
       type: String,
-      enum: ['Disponible', 'reservado', 'pagado', 'retirado', 'vencido'],
+      enum: ['Disponible', 'Reservado', 'pagado', 'retirado', 'vencido'],
       default: 'Disponible',
     },
     holdExpiresAt: { type: Date, default: null },

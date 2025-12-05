@@ -49,7 +49,7 @@ export interface Lote {
   proveedor?: string;
   ubicacion: string;
   fotos: string[];
-  estado: 'Disponible' | 'reservado'; 
+  estado: 'Disponible' | 'Reservado'; 
   codigoRetiro?: string;
 }
 
