@@ -52,11 +52,9 @@ pipeline {
             }
         }
 
-
         stage('Run Selenium UI Tests') {
             steps {
-                dir('frontend') {
-                    sh '''
+                sh '''
                     echo "Ejecutando tests Selenium..."
                     npm run test:ui || true
                     '''
@@ -69,11 +67,23 @@ pipeline {
         }
 
         stage('Deploy to VM') {
-            steps { echo 'Despliegue a la VM (comandos comentados)' }
-        }
-    }
+            steps {
+                echo 'Desplegando a la VM...'
+                /*
+                sshagent(credentials: ['vm-ssh-key']) {
+                    sh 'scp -o StrictHostKeyChecking=no -r backend/* usuario@tu-vm-ip:/ruta/en/vm/rescate-fresco/backend/'
 
+                    sh 'scp -o StrictHostKeyChecking=no -r frontend/dist/* usuario@tu-vm-ip:/ruta/en/vm/rescate-fresco/frontend/dist/'
+
+                    sh 'ssh usuario@tu-vm-ip "cd /ruta/en/vm/rescate-fresco/backend && npm install --production && pm2 restart tu-app"'
+                }
+                */
+                
+                echo '¡Despliegue de ejemplo completado!'
+            }
+        }
     post {
         always { cleanWs() }
     }
+    
 }

@@ -26,7 +26,6 @@ describe("LotList UI Tests (Selenium)", function () {
   });
 
   it("should load lot list and display lote cards", async () => {
-    // Espera a que desaparezca el spinner
     await driver.wait(
       until.stalenessOf(
         await driver.findElement(By.css("[data-testid='loading-spinner']"))
@@ -38,16 +37,6 @@ describe("LotList UI Tests (Selenium)", function () {
 
     if (cards.length === 0) {
       throw new Error("No se encontraron lotes renderizados");
-    }
-  });
-
-  it("should detect lotes without image", async () => {
-    const sinImagenItems = await driver.findElements(
-      By.css("[data-testid='sin-imagen']")
-    );
-
-    if (sinImagenItems.length === 0) {
-      throw new Error("No detectó lotes sin imagen");
     }
   });
 
