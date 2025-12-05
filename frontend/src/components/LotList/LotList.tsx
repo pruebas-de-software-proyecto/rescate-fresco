@@ -8,6 +8,8 @@ import { FilterSidebar } from "./FilterSidebar";
 import { LoteCard } from "./LoteCard";
 import { SearchBar } from "./SearchBar";
 
+import s from './LotList.module.css';
+
 const DEFAULT_CATEGORY = "Todos";
 
 export default function LotList() {
@@ -99,14 +101,16 @@ export default function LotList() {
             gap: 3,
           }}
         >
-          {lotes.map((lote) => (
-            <LoteCard
-              key={lote._id}
-              lote={lote}
-              onView={() => navigate(`/lotes/${lote._id}`)}
-              onReserve={() => handleReserve(lote)} 
-            />
-          ))}
+          <div className={s.loteGrid}>
+            {lotes.map((lote) => (
+              <LoteCard
+                key={lote._id}
+                lote={lote}
+                onView={() => navigate(`/lotes/${lote._id}`)}
+                onReserve={() => handleReserve(lote)} 
+              />
+            ))}
+          </div>
         </Box>
       </Box>
     </Box>
