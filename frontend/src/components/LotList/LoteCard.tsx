@@ -11,6 +11,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Lote } from "../../api/lotes";
 
+import { useAuth } from '../../context/AuthContext';
+
 interface Props {
   lote: Lote;
   onView: () => void;
@@ -19,13 +21,14 @@ interface Props {
 
 export function LoteCard({ lote, onView, onReserve }: Props) {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const estadoColors: Record<
     string,
     "default" | "success" | "warning" | "error" | "info"
   > = {
     Disponible: "success",
-    reservado: "warning",
+    Reservado: "warning",
     pagado: "info",
     retirado: "default",
     vencido: "error",
@@ -35,11 +38,24 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
     navigate(`/pago/${lote._id}`);
   };
 
+
+  const formatDateShort = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('es-CL', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric',
+      timeZone: 'UTC'
+    }).format(date);
+  };
+  
+
   return (
     <Card
       data-testid="lote-card" 
       sx={{
-        width: 260,
+        width: 320,
         borderRadius: 3,
         boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
         cursor: "pointer",
@@ -67,7 +83,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
           backgroundColor:
             lote.estado === "Disponible"
               ? "#4caf50"
-              : lote.estado === "reservado"
+              : lote.estado === "Reservado"
               ? "#ffb300"
               : lote.estado === "pagado"
               ? "#0288d1"
@@ -111,7 +127,7 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
 
           <Typography variant="body2" color="success.main" sx={{ mt: 1 }}>
             Fecha vencimiento:{" "}
-            {new Date(lote.fechaVencimiento).toLocaleDateString("es-CL")}
+            {formatDateShort(lote.fechaVencimiento.toString())}
           </Typography>
         </CardContent>
       </Box>
@@ -130,14 +146,17 @@ export function LoteCard({ lote, onView, onReserve }: Props) {
           Ver detalle
         </Button>
 
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={lote.estado !== "Disponible"}
-          onClick={handleReserve}
-        >
-          {lote.estado === "reservado" ? "Reservado" : "Reservar"}
-        </Button>
+        {user?.role === 'CONSUMIDOR' && (
+          <Button
+            sx={{ width: '100%' }}
+            variant="contained"
+            color="primary"
+            disabled={lote.estado !== "Disponible"}
+            onClick={handleReserve}
+          >
+            {lote.estado === "Reservado" ? "Reservado" : "Reservar"}
+          </Button>
+        )}
       </Stack>
     </Card>
   );

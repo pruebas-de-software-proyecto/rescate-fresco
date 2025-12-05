@@ -1,0 +1,9 @@
+.logoButton {
+  background-color: none;
+  border: 0;
+  text-decoration: none;
+}
+
+.logoButton:hover {
+  border: 0;
+}

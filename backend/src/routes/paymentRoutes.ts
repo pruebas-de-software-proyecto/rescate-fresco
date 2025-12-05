@@ -1,4 +1,4 @@
-import express, { Router, Request, Response } from "express";
+import express, { Request, Response, Router } from "express";
 import Stripe from "stripe";
 import Lot from "../models/lotModels";
 
@@ -60,7 +60,7 @@ router.post(
       const lotId = pi.metadata.lotId;
 
       try {
-        await Lot.findByIdAndUpdate(lotId, { estado: "reservado" });
+        await Lot.findByIdAndUpdate(lotId, { estado: "Reservado" });
         console.log("✅ Lote marcado como reservado:", lotId);
       } catch (err) {
         console.error("Error actualizando lote:", err);

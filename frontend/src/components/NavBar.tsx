@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Box, 
-  IconButton,
-  Menu,       // <-- Importado
-  MenuItem    // <-- Importado
-} from "@mui/material";
-import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import EmojiNatureOutlinedIcon from "@mui/icons-material/EmojiNatureOutlined";
-import { useNavigate } from 'react-router-dom'; // <-- Importado
+import {
+  AppBar,
+  Box,
+  IconButton,
+  Menu, // <-- Importado
+  MenuItem,
+  Toolbar,
+  Typography
+} from "@mui/material";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // <-- Importado
 import { useAuth } from '../context/AuthContext'; // <-- Importado
+
+import s from './NavBar.module.css';
 
 export default function NavBar() {
   // --- LÓGICA DE AUTENTICACIÓN Y NAVEGACIÓN ---
@@ -57,12 +58,14 @@ export default function NavBar() {
           sx={{ cursor: 'pointer' }}
         >
           <EmojiNatureOutlinedIcon sx={{ color: "#FFF9C4" }} />
-          <Typography
-            variant="h6"
-            sx={{ color: "#FFF9C4", fontWeight: 500, letterSpacing: "0.5px" }}
-          >
-            RescateFresco
-          </Typography>
+          <Link to="/" className={s.logoButton}>
+            <Typography
+              variant="h6"
+              sx={{ color: "#FFF9C4", fontWeight: 500, letterSpacing: "0.5px" }}
+            >
+              RescateFresco
+            </Typography>
+          </Link>
         </Box>
 
         {/* Navegación (AHORA ES DINÁMICA) */}
@@ -73,28 +76,49 @@ export default function NavBar() {
             <>
               {/* Navegación basada en ROL */}
               {user?.role === 'TIENDA' ? (
-                <Typography
-                  variant="body2"
-                  sx={{ color: "white", cursor: "pointer", "&:hover": { opacity: 0.8 } }}
-                  onClick={() => navigate('/gestion-lotes')} // <-- Funcional
-                >
-                  Gestión de Lotes
-                </Typography>
+                <>                
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "white", cursor: "pointer", "&:hover": { opacity: 0.8 } }}
+                    onClick={() => navigate('/gestion-lotes')} // <-- Funcional
+                  >
+                    Gestión de Lotes
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "white", cursor: "pointer", "&:hover": { opacity: 0.8 } }}
+                    onClick={() => navigate('/reservations-admin')} // <-- Funcional
+                  >
+                    Reservas
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "white", cursor: "pointer", "&:hover": { opacity: 0.8 } }}
+                    onClick={() => navigate('/tienda/metricas')} // <-- Funcional
+                  >
+                    Mis Métricas
+                  </Typography>
+                </>
               ) : (
-                <Typography
-                  variant="body2"
-                  sx={{ color: "white", cursor: "pointer", "&:hover": { opacity: 0.8 } }}
-                  onClick={() => navigate('/')} // <-- Funcional
-                >
-                  Productos
-                </Typography>
+                <>                
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "white", cursor: "pointer", "&:hover": { opacity: 0.8 } }}
+                    onClick={() => navigate('/')} // <-- Funcional
+                  >
+                    Productos
+                  </Typography>
+                                    <Typography
+                    variant="body2"
+                    sx={{ color: "white", cursor: "pointer", "&:hover": { opacity: 0.8 } }}
+                    onClick={() => navigate('/reservation')} // <-- Funcional
+                  >
+                    Mis reservaciones
+                  </Typography>
+
+                </>
+
               )}
-            
-              {/* Íconos */}
-              <IconButton size="small" sx={{ color: "white" }}>
-                <ShoppingCartOutlinedIcon />
-              </IconButton>
-              
               {/* Botón de Menú de Usuario */}
               <IconButton 
                 size="small" 

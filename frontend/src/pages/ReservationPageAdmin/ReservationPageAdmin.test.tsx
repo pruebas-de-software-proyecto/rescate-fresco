@@ -8,7 +8,19 @@ import AdminReservationsPage from "./ReservationPageAdmin";
 // 1. Mocks de dependencias
 vi.mock("../../api/lotes");
 vi.mock("../../api/user");
-vi.mock("../../services/types");
+vi.mock("../../services/types", () => ({
+  default: {
+    getAll: vi.fn(),
+    create: vi.fn(),
+    getById: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn()
+  }
+}));
+
+// Importar después del mock para obtener la versión mockeada
+import FullLotesAPI from "../../services/types";
+const mockFullLotesAPI = vi.mocked(FullLotesAPI);
 
 // Datos de prueba: 2 lotes de diferentes tiendas
 const mockLotesMixtos = [
@@ -25,7 +37,7 @@ const mockLotesMixtos = [
     ventanaRetiro: "10:00 - 14:00",
     ubicacion: "Mi ubicación",
     fotos: [],
-    estado: "reservado" as const,
+    estado: "Reservado" as const,
     proveedor: "Mi Tienda",
     tienda: "Mi Tienda", // Campo que usa el filtro
     codigoRetiro: "EXITO1",
@@ -45,7 +57,7 @@ const mockLotesMixtos = [
     ventanaRetiro: "15:00 - 19:00",
     ubicacion: "Otra ubicación",
     fotos: [],
-    estado: "reservado" as const,
+    estado: "Reservado" as const,
     proveedor: "Otra Tienda", // NO coincide
     tienda: "Otra Tienda", // Campo que usa el filtro
     codigoRetiro: "OTRO1",
@@ -70,6 +82,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
 
     // 2. Simulamos que el sistema devuelve lotes mezclados
     vi.mocked(fetchLotes).mockResolvedValue(mockLotesMixtos as any);
+    mockFullLotesAPI.getAll.mockResolvedValue(mockLotesMixtos);
 
     render(
       <BrowserRouter>
@@ -92,6 +105,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
     // Setup inicial
     vi.mocked(tiendasAPI.getMiTienda).mockResolvedValue({ nombreTienda: "Mi Tienda" } as any);
     vi.mocked(fetchLotes).mockResolvedValue([mockLotesMixtos[0]] as any);
+    mockFullLotesAPI.getAll.mockResolvedValue([mockLotesMixtos[0]]);
 
     render(
       <BrowserRouter>
@@ -121,6 +135,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
   it("muestra error si el código es INCORRECTO", async () => {
     vi.mocked(tiendasAPI.getMiTienda).mockResolvedValue({ nombreTienda: "Mi Tienda" } as any);
     vi.mocked(fetchLotes).mockResolvedValue([mockLotesMixtos[0]] as any);
+    mockFullLotesAPI.getAll.mockResolvedValue([mockLotesMixtos[0]]);
 
     render(
       <BrowserRouter>
@@ -146,6 +161,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
   it("valida que el modal se cierra al hacer clic en Cerrar", async () => {
     vi.mocked(tiendasAPI.getMiTienda).mockResolvedValue({ nombreTienda: "Mi Tienda" } as any);
     vi.mocked(fetchLotes).mockResolvedValue([mockLotesMixtos[0]] as any);
+    mockFullLotesAPI.getAll.mockResolvedValue([mockLotesMixtos[0]]);
 
     render(
       <BrowserRouter>
@@ -171,6 +187,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
   it("valida que el input se limpia cuando se cierra y reabre el modal", async () => {
     vi.mocked(tiendasAPI.getMiTienda).mockResolvedValue({ nombreTienda: "Mi Tienda" } as any);
     vi.mocked(fetchLotes).mockResolvedValue([mockLotesMixtos[0]] as any);
+    mockFullLotesAPI.getAll.mockResolvedValue([mockLotesMixtos[0]]);
 
     render(
       <BrowserRouter>
@@ -200,6 +217,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
   it("valida que los mensajes de error/éxito se limpian al cerrar el modal", async () => {
     vi.mocked(tiendasAPI.getMiTienda).mockResolvedValue({ nombreTienda: "Mi Tienda" } as any);
     vi.mocked(fetchLotes).mockResolvedValue([mockLotesMixtos[0]] as any);
+    mockFullLotesAPI.getAll.mockResolvedValue([mockLotesMixtos[0]]);
 
     render(
       <BrowserRouter>
@@ -239,6 +257,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
 
     // Solo lotes de otras tiendas
     vi.mocked(fetchLotes).mockResolvedValue([mockLotesMixtos[1]] as any);
+    mockFullLotesAPI.getAll.mockResolvedValue([mockLotesMixtos[1]]);
 
     render(
       <BrowserRouter>
@@ -257,6 +276,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
   it("valida códigos con diferentes formatos (mayúsculas/minúsculas)", async () => {
     vi.mocked(tiendasAPI.getMiTienda).mockResolvedValue({ nombreTienda: "Mi Tienda" } as any);
     vi.mocked(fetchLotes).mockResolvedValue([mockLotesMixtos[0]] as any);
+    mockFullLotesAPI.getAll.mockResolvedValue([mockLotesMixtos[0]]);
 
     render(
       <BrowserRouter>
@@ -283,6 +303,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
   it("valida que el botón Validar está deshabilitado con input vacío", async () => {
     vi.mocked(tiendasAPI.getMiTienda).mockResolvedValue({ nombreTienda: "Mi Tienda" } as any);
     vi.mocked(fetchLotes).mockResolvedValue([mockLotesMixtos[0]] as any);
+    mockFullLotesAPI.getAll.mockResolvedValue([mockLotesMixtos[0]]);
 
     render(
       <BrowserRouter>
@@ -308,6 +329,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
   it("maneja errores de red al cargar los lotes", async () => {
     vi.mocked(tiendasAPI.getMiTienda).mockResolvedValue({ nombreTienda: "Mi Tienda" } as any);
     vi.mocked(fetchLotes).mockRejectedValue(new Error("Error de red"));
+    mockFullLotesAPI.getAll.mockRejectedValue(new Error("Error de red"));
 
     render(
       <BrowserRouter>
@@ -325,6 +347,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
   it("maneja errores al obtener información de la tienda", async () => {
     vi.mocked(tiendasAPI.getMiTienda).mockRejectedValue(new Error("Error al obtener tienda"));
     vi.mocked(fetchLotes).mockResolvedValue([mockLotesMixtos[0]] as any);
+    mockFullLotesAPI.getAll.mockResolvedValue([mockLotesMixtos[0]]);
 
     render(
       <BrowserRouter>
@@ -342,6 +365,7 @@ describe("AdminReservationsPage (Vista Tienda)", () => {
   it("valida el formato del placeholder del input", async () => {
     vi.mocked(tiendasAPI.getMiTienda).mockResolvedValue({ nombreTienda: "Mi Tienda" } as any);
     vi.mocked(fetchLotes).mockResolvedValue([mockLotesMixtos[0]] as any);
+    mockFullLotesAPI.getAll.mockResolvedValue([mockLotesMixtos[0]]);
 
     render(
       <BrowserRouter>

@@ -15,9 +15,17 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    
+    // Imprimimos en consola qué está pasando
+    console.log(`📡 Enviando petición a: ${config.url}`);
+    
     if (token) {
+      console.log("✅ Token encontrado en LocalStorage. Adjuntando...");
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn("⚠️ ALERTA: No hay token en LocalStorage. Se envía sin credenciales.");
     }
+    
     return config;
   },
   (error) => {
@@ -41,7 +49,7 @@ export interface Lote {
   proveedor?: string;
   ubicacion: string;
   fotos: string[];
-  estado: 'Disponible' | 'reservado'; 
+  estado: 'Disponible' | 'Reservado'; 
   codigoRetiro?: string;
 }
 

@@ -13,12 +13,11 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-
 import { getLoteById } from '../../api/lotes';
 import { useAuth } from '../../context/AuthContext';
-
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import { FullLote } from '../../services/types';
+
 import styles from './DetailPage.module.css';
 
 
@@ -28,6 +27,14 @@ export default function DetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [imgIndex, setImgIndex] = useState(0);
+    const { user } = useAuth();
+
+
+    const formatDateShort = (dateString: string) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long', year: 'numeric' ,timeZone: 'UTC' }).format(date);
+    };
 
     const { logout } = useAuth();
 
@@ -204,29 +211,32 @@ export default function DetailPage() {
                                 <strong>Cantidad:</strong> {product.cantidad} {product.unidad}
                             </Typography>
                             <Typography color="textSecondary">
-                                <strong>Vencimiento:</strong> {formatDate(product.fechaVencimiento)}
+                                <strong>Vencimiento:</strong> {formatDateShort(product.fechaVencimiento.toString())}
                             </Typography>
                         </div>
 
-                        <Button
-                            variant="contained"
-                            color="inherit"
-                            size="large"
-                            startIcon={<AddShoppingCartIcon />}
-                            onClick={handleAddToCart}
-                            className={styles.addToCartButton}
-                            sx={{
-                                backgroundColor: '#2A7C48',
-                                color: '#ffffff',
-                                '&:hover': { backgroundColor: '#0d3d1eff' },
-                                boxShadow: 'none',
-                                width: '100%',
-                                textTransform: 'none',
-                                mb: 2.5
-                            }}
-                        >
-                            Añadir al Carrito
-                        </Button>
+                        {user?.role === 'CONSUMIDOR' && (
+                            <Button
+                                variant="contained"
+                                color="inherit"
+                                size="large"
+                                startIcon={<AddShoppingCartIcon />}
+                                onClick={handleAddToCart}
+                                className={styles.addToCartButton}
+                                sx={{
+                                    backgroundColor: '#2A7C48',
+                                    color: '#ffffff',
+                                    '&:hover': { backgroundColor: '#0d3d1eff' },
+                                    boxShadow: 'none',
+                                    width: '100%',
+                                    textTransform: 'none',
+                                    mb: 2.5
+                                }}
+                            >
+                                Añadir al Carrito
+                            </Button>
+                        )}
+
 
                         <Typography variant="body1" color="text.secondary" fontWeight="medium" sx={{ mb: 0.5 }}>
                             <strong>Descripción:</strong>

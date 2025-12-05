@@ -2,19 +2,20 @@ import {
   Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent,
   DialogTitle, MenuItem, TextField, Typography
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import FullLotesAPI, { FullLote } from '../services/types';
+import { useAuth } from '../context/AuthContext';
+import tiendasAPI from '../api/user';
 
 interface LoteCreateDialogProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
-type Nullable<T> = {
-    [P in keyof T]: T[P] | null;
-};
+
+type Nullable<T> = { [P in keyof T]: T[P] | null; };
 type FormDataState = Nullable<Omit<FullLote, '_id' | 'createdAt' | 'updatedAt' | 'fotos'>> & {
-    imageUrl: string;
+  imageUrl: string;
 };
 
 const initialState: FormDataState = {
@@ -28,7 +29,7 @@ const initialState: FormDataState = {
   fechaVencimiento: new Date().toISOString().split('T')[0],
   ventanaRetiro: '',
   ubicacion: '',
-  proveedor: '',
+  proveedor: '', // Ya no importa, el backend lo llena
   estado: 'Disponible',
   imageUrl: '',
 };
@@ -40,12 +41,32 @@ const LoteCreateDialog: React.FC<LoteCreateDialogProps> = ({ open, onClose, onSu
   const [formData, setFormData] = useState<FormDataState>(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nombreTiendaReal, setNombreTiendaReal] = useState('Cargando...');
 
-const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+
+  useEffect(() => {
+    if (open) {
+        const fetchNombreTienda = async () => {
+            try {
+                // Llamamos al endpoint /tiendas/me que ya tenías configurado
+                const perfil = await tiendasAPI.getMiTienda();
+                if (perfil && perfil.nombreTienda) {
+                    setNombreTiendaReal(perfil.nombreTienda);
+                } else {
+                    setNombreTiendaReal('Tienda Desconocida');
+                }
+            } catch (err) {
+                console.error("Error cargando nombre de tienda:", err);
+                setNombreTiendaReal('Error al cargar nombre');
+            }
+        };
+        fetchNombreTienda();
+    }
+  }, [open]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
     const numericFields = ['cantidad', 'precioOriginal', 'precioRescate'];
-    
     let finalValue: string | number | null = value;
 
     if (numericFields.includes(name) || type === 'number') {
@@ -56,28 +77,20 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
             finalValue = isNaN(numValue) ? null : numValue;
         }
     }
-  
     setFormData((prev) => ({ ...prev, [name]: finalValue }));
     setError(null);
   };
 
-const handleSubmit = async () => {
-    setLoading(true);
+  const handleSubmit = async () => {
+
     setError(null);
 
-    const numericFields = ['cantidad', 'precioOriginal', 'precioRescate'];
-    const negativeField = numericFields.find(field => {
-        const val = formData[field as keyof FormDataState];
-        return typeof val === 'number' && val <= 0;
-    });
 
-    if (negativeField) {
-        setError(`El campo '${negativeField}' debe ser un número mayor a 0.`);
-        setLoading(false);
-        return;
-    }
-
-    const requiredFields: (keyof FormDataState)[] = ['nombre', 'categoria', 'cantidad', 'precioOriginal', 'precioRescate', 'fechaVencimiento', 'ventanaRetiro', 'ubicacion', 'proveedor', 'unidad'];
+    const requiredFields: (keyof FormDataState)[] = [
+        'nombre', 'categoria', 'descripcion', 'cantidad', 'unidad', 
+        'precioOriginal', 'precioRescate', 'fechaVencimiento', 
+        'ventanaRetiro', 'ubicacion'
+    ];
     
     const missingField = requiredFields.find(field => {
         const val = formData[field];
@@ -85,164 +98,104 @@ const handleSubmit = async () => {
     });
     
     if (missingField) {
-        setError(`El campo '${missingField}' no puede estar vacío.`);
-        setLoading(false);
+        setError(`El campo '${missingField}' es obligatorio.`);
         return;
     }
 
-    const fechaVencimientoStr = formData.fechaVencimiento as string;
-    const fechaVencimiento = new Date(fechaVencimientoStr + 'T00:00:00');
+    if (Number(formData.cantidad) <= 0) {
+        setError('La cantidad debe ser mayor a 0.');
+        return;
+    }
+    if (Number(formData.precioRescate) >= Number(formData.precioOriginal)) {
+        setError('El precio de rescate debe ser menor que el original.');
+        return;
+    }
+
+    const fechaInput = new Date(formData.fechaVencimiento + 'T00:00:00');
     const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    hoy.setHours(0, 0, 0, 0); // Resetear horas para comparar solo fechas
 
-    if (fechaVencimiento < hoy) {
+    if (fechaInput < hoy) {
         setError('La fecha de vencimiento no puede ser anterior a la fecha actual.');
-        setLoading(false);
         return;
     }
 
-    // Validar que el precio de rescate sea menor que el precio original
-    const precioOriginal = Number(formData.precioOriginal);
-    const precioRescate = Number(formData.precioRescate);
-    
-    if (precioRescate >= precioOriginal) {
-        setError('El precio de rescate debe ser menor que el precio original.');
-        setLoading(false);
-        return;
-    }
+    setLoading(true);
     
     try {
       const { imageUrl, ...loteData } = formData;
       
       const lotePayload: Omit<FullLote, "_id" | "createdAt" | "updatedAt"> = {
-        
-        nombre: loteData.nombre!, 
+        nombre: loteData.nombre!,
         categoria: loteData.categoria!,
         descripcion: loteData.descripcion!,
         unidad: loteData.unidad!,
         fechaVencimiento: loteData.fechaVencimiento!,
         ventanaRetiro: loteData.ventanaRetiro!,
         ubicacion: loteData.ubicacion!,
-        proveedor: loteData.proveedor!,
+        
+        proveedor: nombreTiendaReal,
+        
         estado: loteData.estado!,
-
         cantidad: Number(loteData.cantidad)!,
         precioOriginal: Number(loteData.precioOriginal)!,
         precioRescate: Number(loteData.precioRescate)!,
-        
-        fotos: imageUrl ? [imageUrl] : [], 
+        fotos: imageUrl ? [imageUrl] : [],
       };
 
-      await FullLotesAPI.create(lotePayload); 
+      await FullLotesAPI.create(lotePayload);
       
       setFormData(initialState);
-      onSuccess(); 
+      onSuccess();
       onClose();
     } catch (error: any) {
-      const apiError = error.response?.data;
-      let errorMessage = apiError?.message || 'Error desconocido al crear el lote.';
-      
-      if (apiError?.errors) {
-        const firstErrorPath = Object.keys(apiError.errors)[0];
-        const detailedMessage = apiError.errors[firstErrorPath].message;
-        errorMessage = `Error de validación: ${firstErrorPath} - ${detailedMessage}`;
-      }
-      setError(errorMessage);
-      console.error('API Error:', error.response?.data || error);
+      // Manejo de errores más limpio
+      const msg = error.response?.data?.message || error.message || 'Error al crear';
+      setError(msg);
     } finally {
       setLoading(false);
     }
-};
+  };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Crear Nuevo Lote</DialogTitle>
       <DialogContent>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        
-        <TextField 
-            autoFocus margin="dense" name="nombre" 
-            label="Nombre del Producto" type="text" fullWidth 
-            value={formData.nombre} onChange={handleInputChange} 
-            required
+        <TextField margin="dense" label="Tienda" fullWidth value={nombreTiendaReal} disabled variant="filled" InputProps={{ readOnly: true }} sx={{ mb: 2 }}
         />
-        <TextField 
-            margin="dense" name="descripcion" label="Descripción" 
-            type="text" fullWidth multiline rows={3} 
-            value={formData.descripcion} onChange={handleInputChange} 
-            required
-        />
+        <TextField autoFocus margin="dense" name="nombre" label="Nombre del Producto" fullWidth value={formData.nombre} onChange={handleInputChange} required />
+        <TextField margin="dense" name="descripcion" label="Descripción" fullWidth multiline rows={3} value={formData.descripcion} onChange={handleInputChange} required />
         
         <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
-          <TextField 
-            select label="Categoría" name="categoria" 
-            value={formData.categoria} onChange={handleInputChange} fullWidth 
-            required
-          >
+          <TextField select label="Categoría" name="categoria" fullWidth value={formData.categoria} onChange={handleInputChange} required >
             {categorias.map((cat) => (<MenuItem key={cat} value={cat}>{cat}</MenuItem>))}
           </TextField>
-          <TextField 
-            name="cantidad" label="Cantidad" 
-            type="number" value={formData.cantidad} onChange={handleInputChange} 
-            required
-          />
-          <TextField 
-            select label="Unidad" name="unidad" 
-            value={formData.unidad} onChange={handleInputChange} 
-            required
-          >
+          <TextField name="cantidad" label="Cantidad" type="number" fullWidth value={formData.cantidad || ''} onChange={handleInputChange} required />
+          <TextField select label="Unidad" name="unidad" fullWidth value={formData.unidad} onChange={handleInputChange} required >
             {unidades.map((u) => (<MenuItem key={u} value={u}>{u}</MenuItem>))}
           </TextField>
         </Box>
         
         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-            <TextField 
-                name="precioOriginal" label="Precio Original" 
-                type="number" fullWidth value={formData.precioOriginal} onChange={handleInputChange} 
-                required
-            />
-            <TextField 
-                name="precioRescate" label="Precio Rescate" 
-                type="number" fullWidth value={formData.precioRescate} onChange={handleInputChange} 
-                required
-            />
+            <TextField name="precioOriginal" label="Precio Original" type="number" fullWidth value={formData.precioOriginal || ''} onChange={handleInputChange} required />
+            <TextField name="precioRescate" label="Precio Rescate" type="number" fullWidth value={formData.precioRescate || ''} onChange={handleInputChange} required />
         </Box>
         
         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-            <TextField 
-                margin="dense" name="fechaVencimiento" label="Fecha de Vencimiento" 
-                type="date" fullWidth value={formData.fechaVencimiento} onChange={handleInputChange} 
-                InputLabelProps={{ shrink: true }} 
-                required
-            />
-            <TextField 
-                margin="dense" name="proveedor" label="Proveedor" 
-                type="text" fullWidth value={formData.proveedor} onChange={handleInputChange} 
-                required
-            />
+            <TextField margin="dense" name="fechaVencimiento" label="Fecha de Vencimiento" type="date" fullWidth value={formData.fechaVencimiento} onChange={handleInputChange} InputLabelProps={{ shrink: true }} required />
+            
+            {/* YA NO HAY CAMPO DE PROVEEDOR AQUÍ */}
         </Box>
         
         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-            <TextField
-                margin="dense" name="ventanaRetiro"
-                label="Ventana de Retiro (Ej: 16:00-18:00)" type="text" fullWidth 
-                value={formData.ventanaRetiro} onChange={handleInputChange} 
-                required
-            />
-            <TextField
-                margin="dense" name="ubicacion"
-                label="Ubicación de Retiro" type="text" fullWidth 
-                value={formData.ubicacion} onChange={handleInputChange} 
-                required
-            />
+            <TextField margin="dense" name="ventanaRetiro" label="Ventana de Retiro (Ej: 16:00-18:00)" fullWidth value={formData.ventanaRetiro} onChange={handleInputChange} required />
+            <TextField margin="dense" name="ubicacion" label="Ubicación" fullWidth value={formData.ubicacion} onChange={handleInputChange} required />
         </Box>
         
         <Box sx={{ mt: 2, border: '1px dashed grey', p: 2, borderRadius: 1 }}>
-          <Typography variant="body2" sx={{ mb: 1 }}>URL de la Imagen (Servidor de Nube)</Typography>
-          <TextField
-            margin="dense" name="imageUrl" label="Pegar URL aquí" 
-            type="url" fullWidth value={formData.imageUrl} onChange={handleInputChange} 
-          />
+          <Typography variant="body2" sx={{ mb: 1 }}>URL de la Imagen (Opcional)</Typography>
+          <TextField margin="dense" name="imageUrl" label="Pegar URL aquí" type="url" fullWidth value={formData.imageUrl} onChange={handleInputChange} />
         </Box>
 
       </DialogContent>

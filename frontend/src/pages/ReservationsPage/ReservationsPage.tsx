@@ -20,12 +20,24 @@ import { es } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
-import { fetchLotes, Lote, LoteFilters } from '../../api/lotes';
 import FullLotesAPI from '../../services/types';
 import styles from './ReservationsPage.module.css';
 
+interface Product {
+    _id: string;
+    nombre: string;
+    estado: string;
+    precioRescate: number;
+    ventanaRetiro: string;
+    ubicacion: string;
+    proveedor: string;
+    fechaVencimiento: string;
+    codigoRetiro?: string;
+    fotos?: string[];
+}
+
 export default function ReservationsPage() {
-    const [reservedProducts, setReservedProducts] = useState<Lote[]>([]);
+    const [reservedProducts, setReservedProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [cancellingId, setCancellingId] = useState<string | null>(null);
@@ -41,10 +53,11 @@ export default function ReservationsPage() {
             setError(null);
             
             const allProducts = await FullLotesAPI.getAll();
-            
-            const filters: LoteFilters = { estado: 'reservado' };
             console.log("🔍 Todos los productos:", allProducts);
-            const reservedProducts = await fetchLotes(filters);
+            
+            const reservedProducts = allProducts.filter(
+                (product) => product.estado === 'Reservado'
+            );
             console.log("✅ Productos reservados:", reservedProducts);
             
             setReservedProducts(reservedProducts);

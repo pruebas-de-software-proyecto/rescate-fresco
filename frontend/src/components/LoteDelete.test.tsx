@@ -1,10 +1,13 @@
 // frontend/src/components/LoteTable.test.tsx
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthProvider } from '../context/AuthContext';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import FullLotesAPI, { FullLote } from '../services/types';
 import LoteTable from './loteTable';
+
+beforeAll(() => {
+  window.scrollTo = vi.fn();
+});
 
 // Lote de prueba
 const LoteTest: FullLote = {
@@ -21,62 +24,83 @@ const LoteTest: FullLote = {
   ubicacion: 'Tienda Vaquita Feliz',
   fotos: ['https://example.com/peras.jpg'],
   estado: 'Disponible',    
-  proveedor: 'Colun',
+  proveedor: 'Mi Tienda',
 };
 
-// Helper para renderizar con providers
-const renderWithProviders = (component: React.ReactElement) => {
-  return render(
-    <AuthProvider>
-      {component}
-    </AuthProvider>
-  );
-};
+vi.mock('../context/AuthContext', () => {
+ const mockUser = { id: 'tienda123', nombreTienda: 'Mi Tienda' };
+
+ return {
+   useAuth: () => ({
+      user: mockUser, // Usuario logueado
+      isAuthenticated: true,
+      logout: vi.fn()
+    })
+  };
+});
+
+vi.mock('../services/types', () => ({
+  default: {
+    getAllGestion: vi.fn(), 
+    delete: vi.fn(),
+    getAll: vi.fn(), 
+    update: vi.fn()
+  }
+}))
+
 
 // Mocks
-vi.spyOn(FullLotesAPI, 'getAll').mockResolvedValue([LoteTest]);
-const deleteMock = vi.spyOn(FullLotesAPI, 'delete').mockResolvedValue(LoteTest);
+const mockGetAllGestion = vi.mocked(FullLotesAPI.getAllGestion);
+const mockDelete = vi.mocked(FullLotesAPI.delete);
 
 describe('Feature Delete Lote', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetAllGestion.mockResolvedValue([LoteTest]);
+    mockDelete.mockResolvedValue(LoteTest);
   });
 
+  const waitForTableLoad = async () => {
+    await screen.findByText('Leche sin lactosa', {}, { timeout: 3000 });
+  };
+
   it('muestra diálogo de confirmación al intentar eliminar', async () => {
-    const confirmSpy = vi.spyOn(window, 'confirm');
-    renderWithProviders(<LoteTable />);
-    
+    const confirmSpy = vi.spyOn(window, 'confirm').mockImplementation(() => false);
+    render(<LoteTable />);
+    await waitForTableLoad();
     const deleteButton = await screen.findByRole('button', { name: /delete/i });
-    await act(async () => {
-      fireEvent.click(deleteButton);
-    });
+    fireEvent.click(deleteButton);
 
     expect(confirmSpy).toHaveBeenCalled();
+    expect(mockDelete).not.toHaveBeenCalled()
   });
 
   it('elimina el lote cuando se confirma la acción', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true);
-    renderWithProviders(<LoteTable />);
+
+    render(<LoteTable />);
+    await waitForTableLoad();
     
-    const deleteButton = await screen.findByRole('button', { name: /delete/i });
+    const deleteButton = await screen.getByRole('button', { name: /delete/i });
     await act(async () => {
       fireEvent.click(deleteButton);
     });
 
     await waitFor(() => {
-      expect(deleteMock).toHaveBeenCalledWith('test123');
+      expect(mockDelete).toHaveBeenCalledWith('test123');
     });
+    expect(mockGetAllGestion).toHaveBeenCalledTimes(2);
   });
 
   it('no elimina el lote cuando se cancela la acción', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
-    renderWithProviders(<LoteTable />);
-    
-    const deleteButton = await screen.findByRole('button', { name: /delete/i });
-    await act(async () => {
-      fireEvent.click(deleteButton);
-    });
+    vi.spyOn(window, 'confirm').mockImplementation(() => false);
 
-    expect(deleteMock).not.toHaveBeenCalled();
+    render(<LoteTable />);
+    await waitForTableLoad();
+
+    const deleteButton = await screen.findByRole('button', { name: /delete/i });
+    fireEvent.click(deleteButton);
+
+    expect(mockDelete).not.toHaveBeenCalled();
   });
 });

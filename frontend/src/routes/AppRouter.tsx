@@ -5,8 +5,11 @@ import LoginPage from '../pages/LoginPage/LoginPage';
 import LotesGestionPage from '../pages/LotesGestionPage';
 import LotesPage from '../pages/LotesPage';
 import PagoPage from '../pages/PagoPage';
+import { PinPage } from '../pages/PinPage';
 import RegisterPage from '../pages/RegisterPage/RegisterPage';
+import { ReservationPageAdmin } from '../pages/ReservationPageAdmin';
 import { ReservationsPage } from '../pages/ReservationsPage';
+import { TiendaStatsPage } from '../pages/TiendaStatsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export default function AppRouter() {
@@ -23,14 +26,23 @@ export default function AppRouter() {
           <Route path="/" element={<LotesPage />} />
           <Route path="/lotes/:id" element={<DetailPage />} />
           <Route path="/pago/:id" element={<PagoPage />} />
+          <Route path="/pago/:id/:pin" element={<PinPage />} />
           {/* Rutas protegidas (con NavBar y autenticación) */}
           <Route
-            path="/lotes-gestion"
+            path="/gestion-lotes"
             element={<ProtectedRoute element={<LotesGestionPage />} />}
           />
           <Route
             path="/reservation"
             element={<ProtectedRoute element={<ReservationsPage />} />}
+          />
+          <Route
+            path="/reservations-admin"
+            element={<ProtectedRoute element={<ReservationPageAdmin />} />}
+          />
+          <Route
+            path="/tienda/metricas"
+            element={<ProtectedRoute element={<TiendaStatsPage />} />}
           />
         </Route>
       </Routes>

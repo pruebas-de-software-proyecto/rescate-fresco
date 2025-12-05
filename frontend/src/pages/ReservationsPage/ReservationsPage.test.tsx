@@ -103,7 +103,7 @@ const mockFetchLotesData = [
     ventanaRetiro: '14:00 - 18:00',
     ubicacion: 'Sucursal Plaza de Armas',
     fotos: ['/images/manzanas.jpg'],
-    estado: 'reservado' as const,
+    estado: 'Reservado' as const,
     proveedor: 'FrutasMart',
     codigoRetiro: 'ABC123',
     tienda: 'FrutasMart',
@@ -123,7 +123,7 @@ const mockFetchLotesData = [
     ventanaRetiro: '08:00 - 12:00',
     ubicacion: 'Panadería Central',
     fotos: ['/images/pan-integral.jpg'],
-    estado: 'reservado' as const,
+    estado: 'Reservado' as const,
     proveedor: 'Panadería Artesanal',
     codigoRetiro: 'XYZ789',
     tienda: 'Panadería Artesanal',
@@ -658,6 +658,6 @@ describe('ReservationsPage', () => {
     const codigoButtons = screen.getAllByText('Ver código de retiro');
     await user.click(codigoButtons[0]);
     
-    expect(mockNavigate).toHaveBeenCalledWith('/pago/reserved-1/undefined');
+    expect(mockNavigate).toHaveBeenCalledWith('/pago/reserved-1/ABC123');
   });
 });
